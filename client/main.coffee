@@ -56,15 +56,16 @@ definition = () ->
         this.swap("Welcome!<br/><a href=\"#/game\">Play</a>")
 
     this.get "#/game", () ->
-        log("processing GET #/game 2")
-        log(this)
+        log("processing GET #/game")
         this.render "board.ejs", { width: 100, height: 100 }, (rendered) ->
             log("board rendered")
             this.event_context.swap(rendered)
 
     this.bind "update-board", (e, m) ->
         log("board update")
-        log(m.data)
+        cells = m.data.board.cells
+        for c in cells
+            $("#cell_" + c.x + "_" + c.y).css("background", c.c)
 
 app = $.sammy("#main", definition)
 
@@ -72,5 +73,8 @@ client.init = init
 
 root.tick = () ->
     log("tick")
-    MQ.exchange("life").publish({ board: { cells: [] } }, "board.update");
-    #setTimeout(root.tick, 1000)
+    rand = ((x) -> Math.floor(Math.random() * x))
+    randColour = (() -> "#" + rand(256).toString(16) + rand(256).toString(16) + rand(256).toString(16))
+    cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...100]
+    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update");
+    setTimeout(root.tick, 1000)
