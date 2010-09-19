@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<title>AMQP JS - Advanced Message Queue Protocol Javascript Client Implementaiton - Stocks</title>
+	<script src="../javascripts/mq.js" type="text/javascript"></script>
+	<script src="../javascripts/swfobject.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div id="amqp-wrap" style="position:absolute;z-index:10000;">
+	<div id="AMQPProxy">Loading AMQP Proxy</div>
+</div>
+
+<a href="#" onClick="helloWorld();">Hello World</a><br/>
+<a href="#" onClick="helloWorld2();">Hello World Test Key</a><br/>
+<a href="#" onClick="helloWorld3();">Hello World 3</a><br/>
+<div id="logger">
+</div>
+
+
+<script type="text/javascript">
+
+	function helloWorld() {
+		MQ.exchange("stocks").publish({ value: -45.00 }, "stocks.nyse.amd");
+	};
+	
+	function helloWorld2() {
+		MQ.exchange("stocks").publish({ value: 16.00}, "stocks.nasdaq.intl");
+	};
+	
+	function helloWorld3() {
+		MQ.exchange("stocks").publish({ value: 48.00 }, "stocks.nasdaq.fdx");
+	};
+	
+	MQ.configure({
+		host: "amqp.peermessaging.com"
+	});
+	
+	MQ.on("load", function() {
+		console.log("Test");
+	});
+	
+	MQ.on("connect", function() {
+		alert("Connected");
+	});
+	
+	MQ.on("disconnect", function() {
+		alert("Disconnected");
+	});
+	
+	MQ.queue("auto").callback(function(m) {
+		alert("No Binding Matches");
+	});
+	
+	MQ.queue("auto").bind("stocks", "stocks.nasdaq.intl").callback(function(m) {
+		alert("Intel " + m.data.value);
+	});
+	
+	MQ.queue("auto").bind("stocks", "stocks.nasdaq.*").callback(function(m) {
+		alert("Nasdaq " + m.data.value);
+	});
+	
+	MQ.queue("auto").bind("stocks", "stocks.#").callback(function(m) {
+		alert("All Indexs " + m.data.value);
+	});
+	
+	
+	swfobject.embedSWF(
+		"../swfs/amqp.swf?" + Math.random().toString(),
+		"AMQPProxy",
+		"10",
+		"10",
+		"9",
+		"../swfs/expressInstall.swf",
+		{},
+		{
+			allowScriptAccess: "always",
+			wmode: "opaque",
+			bgcolor: "#ff0000"
+		},
+		{},
+		function() {
+			//object loaded callback.. useful for debugging
+		}
+	);
+
+</script>
+	
+</body>
+
+</html>
