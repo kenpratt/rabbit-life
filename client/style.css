@@ -1,0 +1,21 @@
+body {
+    margin: 0;
+    padding: 1em;
+}
+.board {
+    background: #ccc;
+    border-spacing: 1px;
+}
+.board tr {
+}
+.board tr td {
+    padding: 0;
+}
+.cell {
+    background: #fff;
+    width: 4px;
+    height: 4px;
+}
+.cell.on {
+    background: #333;
+}
