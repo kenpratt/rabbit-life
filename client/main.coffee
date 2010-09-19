@@ -15,21 +15,25 @@ definition = () ->
 
     this.bind "run", () ->
         log("init")
+        context = this
         MQ.configure {
             logger: console,
             host: "0.0.0.0",
             port: 5701
         }
         MQ.on "load", () ->
-            console.log("Loaded")
+            log("Loaded")
         MQ.on "connect", () ->
-            console.log("Connected")
+            log("Connected")
+            setTimeout(root.tick, 100)
         MQ.on "disconnect", () ->
-            console.log("Disconnected")
+            log("Disconnected")
         MQ.topic("life")
         MQ.queue("auto").callback (m) ->
-            alert("No Binding Matches", m)
-        log("foo")
+            log("Error: no binding matches", m)
+        MQ.queue("auto").bind("life", "board.*").callback (m) ->
+            context.trigger("update-board", m)
+
         swfobject.embedSWF(
             "vendor/amqp-js/swfs/amqp.swf?nc=" + Math.random().toString(),
             "AMQPProxy",
@@ -58,6 +62,15 @@ definition = () ->
             log("board rendered")
             this.event_context.swap(rendered)
 
+    this.bind "update-board", (e, m) ->
+        log("board update")
+        log(m.data)
+
 app = $.sammy("#main", definition)
 
 client.init = init
+
+root.tick = () ->
+    log("tick")
+    MQ.exchange("life").publish({ board: { cells: [] } }, "board.update");
+    #setTimeout(root.tick, 1000)
