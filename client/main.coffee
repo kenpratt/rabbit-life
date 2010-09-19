@@ -13,6 +13,8 @@ definition = () ->
     this.use(Sammy.EJS);
     this.debug = true
 
+    dirty_cells = []
+
     this.bind "run", () ->
         log("init")
         context = this
@@ -63,9 +65,22 @@ definition = () ->
 
     this.bind "update-board", (e, m) ->
         log("board update")
+        start = (new Date()).getTime()
+
+        # TODO optimize update by only modifying the cells that changed colour?
+
+        # clear board
+        for c in dirty_cells
+            $("#cell_" + c.x + "_" + c.y).css("background", "#ffffff")
+
+        # set cells that came back from the server
         cells = m.data.board.cells
         for c in cells
             $("#cell_" + c.x + "_" + c.y).css("background", c.c)
+        dirty_cells = cells
+
+        diff = (new Date()).getTime() - start
+        log("update took: ", diff)
 
 app = $.sammy("#main", definition)
 
@@ -75,6 +90,6 @@ root.tick = () ->
     log("tick")
     rand = ((x) -> Math.floor(Math.random() * x))
     randColour = (() -> "#" + rand(256).toString(16) + rand(256).toString(16) + rand(256).toString(16))
-    cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...100]
+    cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...500]
     MQ.exchange("life").publish({ board: { cells: cells } }, "board.update");
-    setTimeout(root.tick, 1000)
+    setTimeout(root.tick, 2000)
