@@ -1,11 +1,25 @@
-<h4>Board</h4>
-
-<table id="board" class="board">
-  <% for (var y=0; y < height; y++) { %>
+<div id="snippet-corner" class="snippet">
+  <table class="board">
     <tr>
-      <% for (var x=0; x < width; x++) { %>
-        <td><div id="cell_<%= x %>_<%= y %>" class="cell"></div></td>
-      <% } %>
+      <td><div class="cell" style="background:white"></div></td>
+      <td><div class="cell" style="background:red"></div></td>
     </tr>
-  <% } %>
-</table>
+    <tr>
+      <td><div class="cell" style="background:red"></div></td>
+      <td><div class="cell" style="background:red"></div></td>
+    </tr>
+  </table>
+</div>
+
+<h4>Board</h4>
+<div id="board-container">
+  <table id="board" class="board">
+    <% for (var y=0; y < height; y++) { %>
+      <tr>
+        <% for (var x=0; x < width; x++) { %>
+          <td><div id="cell_<%= x %>_<%= y %>" class="cell"></div></td>
+        <% } %>
+      </tr>
+    <% } %>
+  </table>
+</div>

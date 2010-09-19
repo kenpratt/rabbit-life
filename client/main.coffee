@@ -62,6 +62,16 @@ definition = () ->
         this.render "board.ejs", { width: 100, height: 100 }, (rendered) ->
             log("board rendered")
             this.event_context.swap(rendered)
+            $(".snippet").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
+            $("#board-container").droppable({
+                drop: (e, ui) ->
+                    id = ui.draggable[0].id
+                    boardPos = $(this).offset()
+                    dropPos = ui.offset
+                    x = Math.round((dropPos.left - boardPos.left) / 5.0)
+                    y = Math.round((dropPos.top - boardPos.top) / 5.0)
+                    log("dropped", id, x, y)
+            })
 
     this.bind "update-board", (e, m) ->
         log("board update")
@@ -91,5 +101,5 @@ root.tick = () ->
     rand = ((x) -> Math.floor(Math.random() * x))
     randColour = (() -> "#" + rand(256).toString(16) + rand(256).toString(16) + rand(256).toString(16))
     cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...500]
-    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update");
-    setTimeout(root.tick, 2000)
+    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update")
+    #setTimeout(root.tick, 5000)
