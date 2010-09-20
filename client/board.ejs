@@ -1,14 +1,24 @@
-<div id="snippet-corner" class="snippet">
-  <table class="board">
-    <tr>
-      <td><div class="cell" style="background:white"></div></td>
-      <td><div class="cell" style="background:red"></div></td>
-    </tr>
-    <tr>
-      <td><div class="cell" style="background:red"></div></td>
-      <td><div class="cell" style="background:red"></div></td>
-    </tr>
-  </table>
+<div id="snippets">
+  <% $.each(snippets, function(id, s) { %>
+    <div class="snippet-container">
+      <h5><%= s.name %></h5>
+      <div id="snippet-<%= id %>" class="snippet" style="width:<%= s.width * 5 %>">
+        <table class="board">
+          <% for (var y=0; y < s.height; y++) { %>
+            <tr>
+              <% for (var x=0; x < s.width; x++) { %>
+                <% if (s.grid[y][x]) { %>
+                  <td><div class="cell" style="background-color:red"></div></td>
+                <% } else { %>
+                  <td><div class="cell" style="background-color:white"></div></td>
+                <% } %>
+              <% } %>
+            </tr>
+          <% } %>
+        </table>
+      </div>
+    </div>
+  <% }) %>
 </div>
 
 <h4>Board</h4>

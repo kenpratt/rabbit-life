@@ -9,6 +9,30 @@ log = (args...) ->
 init = () ->
     app.run("#/")
 
+snippets = {
+    "block": {
+        name: "Block",
+        width: 2,
+        height: 2,
+        cells: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
+        grid: [[true, true], [true, true]]
+    },
+    "blinker": {
+        name: "Blinker",
+        width: 3,
+        height: 1,
+        cells: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
+        grid: [[true, true, true]]
+    },
+    "se-glider": {
+        name: "Glider",
+        width: 3,
+        height: 3,
+        cells: [{ x: 2, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 2 }],
+        grid: [[false, false, true], [true, false, true], [false, true, true]]
+    }
+}
+
 definition = () ->
     this.use(Sammy.EJS);
     this.debug = true
@@ -59,7 +83,7 @@ definition = () ->
 
     this.get "#/game", () ->
         log("processing GET #/game")
-        this.render "board.ejs", { width: 100, height: 100 }, (rendered) ->
+        this.render "board.ejs", { width: 100, height: 100, snippets: snippets }, (rendered) ->
             log("board rendered")
             this.event_context.swap(rendered)
             $(".snippet").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
