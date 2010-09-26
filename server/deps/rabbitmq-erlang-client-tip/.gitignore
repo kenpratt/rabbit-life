@@ -1,0 +1,4 @@
+deps
+dist
+ebin
+rabbit_common.app

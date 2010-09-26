@@ -1,0 +1,8 @@
+codegen/amqp_codegen.pyc
+deps.mk
+ebin/rabbit.app
+include/rabbit_framing.hrl
+src/rabbit_ctl_usage.erl
+src/rabbit_framing_amqp_0_8.erl
+src/rabbit_framing_amqp_0_9_1.erl
+src/rabbit_multi_usage.erl
