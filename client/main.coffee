@@ -97,6 +97,7 @@ definition = () ->
                     for dy in [0...s.height]
                         for dx in [0...s.width] when s.grid[dy][dx]
                             cells.push({x: x + dx, y: y + dy, c: "#ff0000"})
+                    MQ.exchange("life").publish({ board: { cells: cells } }, "life.board.add")
                     MQ.exchange("life").publish({ board: { cells: cells } }, "board.update")
             })
 
