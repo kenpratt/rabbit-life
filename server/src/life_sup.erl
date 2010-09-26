@@ -14,6 +14,9 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    Children = [],
+    Board = {board, {board, start_link, []},
+             permanent, 2000, worker, [board]},
+
+    Children = [Board],
     RestartStrategy = {one_for_one, 4, 3600},
     {ok, {RestartStrategy, Children}}.
