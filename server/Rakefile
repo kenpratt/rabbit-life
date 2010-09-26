@@ -1,5 +1,6 @@
 BASE_DIR = File.expand_path(File.dirname(__FILE__))
-RABBIT_SERVER_DIR = File.join(BASE_DIR, "deps", "rabbitmq-server")
+RABBIT_SERVER_DIR = File.join(BASE_DIR, "vendor", "rabbitmq-server")
+POLICY_SERVER_DIR = File.join(BASE_DIR, "vendor", "policy-server")
 
 desc "Build the RabbitMQ server"
 task :build_rabbit_server do
@@ -9,4 +10,9 @@ end
 desc "Start the RabbitMQ server"
 task :start_rabbit_server => :build_rabbit_server do
   sh "cd #{RABBIT_SERVER_DIR} && make run RABBITMQ_NODE_IP_ADDRESS='0.0.0.0' export RABBITMQ_NODE_PORT='5777'"
+end
+
+desc "Start the Flash policy server"
+task :start_policy_server do
+  sh "cd #{POLICY_SERVER_DIR} && sudo python server.py --file=crossdomain.xml"
 end
