@@ -13,9 +13,14 @@ task :build_rabbit_client do
   sh "cd #{RABBIT_CLIENT_DIR} && make"
 end
 
+desc "Build the Life server"
+task :build_life_server do
+  sh "cd #{BASE_DIR} && erlc -o ebin src/*.erl"
+end
+
 desc "Start the RabbitMQ server"
-task :start_rabbit_server => [ :build_rabbit_server, :build_rabbit_client ] do
-  args = "-pa #{File.join(BASE_DIR, "ebin")} -pa #{File.join(RABBIT_CLIENT_DIR, "ebin")}"
+task :start_rabbit_server => [ :build_rabbit_server, :build_rabbit_client, :build_life_server ] do
+  args = "-pa #{File.join(BASE_DIR, "ebin")} -pa #{File.join(RABBIT_CLIENT_DIR, "ebin")} -s life -s reloader"
   sh "cd #{RABBIT_SERVER_DIR} && make run RABBITMQ_NODE_IP_ADDRESS=\"0.0.0.0\" RABBITMQ_NODE_PORT=\"5777\" RABBITMQ_SERVER_START_ARGS=\"#{args}\""
 end
 
