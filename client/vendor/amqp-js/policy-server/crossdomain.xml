@@ -2,5 +2,5 @@
 <!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
 <cross-domain-policy>
 	<site-control permitted-cross-domain-policies="master-only"/>
-	<allow-access-from domain="*" to-ports="61613,5672" />
+	<allow-access-from domain="*" to-ports="61613,5672,5777" />
 </cross-domain-policy>

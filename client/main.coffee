@@ -42,7 +42,7 @@ definition = () ->
         MQ.configure {
             logger: console,
             host: "0.0.0.0",
-            port: 5701
+            port: 5777
         }
         MQ.on "load", () ->
             log("Loaded")
