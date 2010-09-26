@@ -1,4 +1,5 @@
 ebin
+*.dump
 codegen/*.pyc
 include/rabbit_framing.hrl
 src/rabbit_framing_*.erl

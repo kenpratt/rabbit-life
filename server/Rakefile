@@ -1,5 +1,6 @@
 BASE_DIR = File.expand_path(File.dirname(__FILE__))
 RABBIT_SERVER_DIR = File.join(BASE_DIR, "vendor", "rabbitmq-server")
+RABBIT_CLIENT_DIR = File.join(BASE_DIR, "vendor", "rabbitmq-erlang-client")
 POLICY_SERVER_DIR = File.join(BASE_DIR, "vendor", "policy-server")
 
 desc "Build the RabbitMQ server"
@@ -7,9 +8,15 @@ task :build_rabbit_server do
   sh "cd #{RABBIT_SERVER_DIR} && make"
 end
 
+desc "Build the RabbitMQ client"
+task :build_rabbit_client do
+  sh "cd #{RABBIT_CLIENT_DIR} && make"
+end
+
 desc "Start the RabbitMQ server"
-task :start_rabbit_server => :build_rabbit_server do
-  sh "cd #{RABBIT_SERVER_DIR} && make run RABBITMQ_NODE_IP_ADDRESS='0.0.0.0' export RABBITMQ_NODE_PORT='5777'"
+task :start_rabbit_server => [ :build_rabbit_server, :build_rabbit_client ] do
+  args = "-pa #{File.join(BASE_DIR, "ebin")} -pa #{File.join(RABBIT_CLIENT_DIR, "ebin")}"
+  sh "cd #{RABBIT_SERVER_DIR} && make run RABBITMQ_NODE_IP_ADDRESS=\"0.0.0.0\" RABBITMQ_NODE_PORT=\"5777\" RABBITMQ_SERVER_START_ARGS=\"#{args}\""
 end
 
 desc "Start the Flash policy server"
