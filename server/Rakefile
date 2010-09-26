@@ -15,7 +15,7 @@ end
 
 desc "Build the Life server"
 task :build_life_server do
-  sh "cd #{BASE_DIR} && erlc -o ebin src/*.erl"
+  sh "cd #{BASE_DIR} && ERL_LIBS=\"#{File.join(RABBIT_CLIENT_DIR, "deps")}\" erlc -o ebin -I #{File.join(RABBIT_CLIENT_DIR, "include")} src/*.erl"
 end
 
 desc "Start the RabbitMQ server"

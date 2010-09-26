@@ -10,7 +10,7 @@
 
 -define(SERVER, ?MODULE).
 
--record(state, {}).
+-record(state, {connection, channel}).
 
 %%%===================================================================
 %%% API
@@ -24,8 +24,13 @@ start_link() ->
 %%%===================================================================
 
 init([]) ->
+    Connection = rabbit_client:open_connection(),
+    Channel = rabbit_client:open_channel(Connection),
+
+    rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
+
     io:format("Board started~n", []),
-    {ok, #state{}}.
+    {ok, #state{connection = Connection, channel = Channel}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -36,7 +41,9 @@ handle_cast(_Msg, State) ->
 handle_info(_Info, State) ->
     {noreply, State}.
 
-terminate(_Reason, _State) ->
+terminate(_Reason, #state{connection = Connection, channel = Channel}) ->
+    rabbit_client:close_channel(Channel),
+    rabbit_client:close_connection(Connection),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
