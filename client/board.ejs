@@ -2,7 +2,7 @@
   <% $.each(snippets, function(id, s) { %>
     <div class="snippet-container">
       <h5><%= s.name %></h5>
-      <div id="snippet-<%= id %>" class="snippet" style="width:<%= s.width * 5 %>">
+      <div id="<%= id %>" class="snippet" style="width:<%= s.width * 5 %>">
         <table class="board">
           <% for (var y=0; y < s.height; y++) { %>
             <tr>

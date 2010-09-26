@@ -10,25 +10,22 @@ init = () ->
     app.run("#/")
 
 snippets = {
-    "block": {
+    "snippet-block": {
         name: "Block",
         width: 2,
         height: 2,
-        cells: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
         grid: [[true, true], [true, true]]
     },
-    "blinker": {
+    "snippet-blinker": {
         name: "Blinker",
         width: 3,
         height: 1,
-        cells: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
         grid: [[true, true, true]]
     },
-    "se-glider": {
+    "snippet-se-glider": {
         name: "Glider",
         width: 3,
         height: 3,
-        cells: [{ x: 2, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 2 }],
         grid: [[false, false, true], [true, false, true], [false, true, true]]
     }
 }
@@ -94,7 +91,13 @@ definition = () ->
                     dropPos = ui.offset
                     x = Math.round((dropPos.left - boardPos.left) / 5.0)
                     y = Math.round((dropPos.top - boardPos.top) / 5.0)
-                    log("dropped", id, x, y)
+                    s = snippets[id]
+                    log("dropped", id, x, y, s)
+                    cells = []
+                    for dy in [0...s.height]
+                        for dx in [0...s.width] when s.grid[dy][dx]
+                            cells.push({x: x + dx, y: y + dy, c: "#ff0000"})
+                    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update")
             })
 
     this.bind "update-board", (e, m) ->
