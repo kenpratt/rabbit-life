@@ -8,7 +8,9 @@
          create_exchange/3,
          create_queue/2,
          bind_queue/4,
-         subscribe_to_queue/2]).
+         subscribe_to_queue/2,
+         is_amqp_message/1,
+         get_content/1]).
 
 -include("amqp_client.hrl").
 
@@ -50,6 +52,16 @@ subscribe_to_queue(Queue, Channel) when is_binary(Queue), is_pid(Channel) ->
     Cmd = #'basic.consume'{queue = Queue},
     #'basic.consume_ok'{consumer_tag = ConsumerTag} = amqp_channel:subscribe(Channel, Cmd, self()),
     ConsumerTag.
+
+is_amqp_message({#'basic.deliver'{}, #'amqp_msg'{}}) ->
+    true;
+is_amqp_message(_) ->
+    false.
+
+get_content({#'basic.deliver'{}, #'amqp_msg'{} = Msg}) ->
+    get_content(Msg);
+get_content(#'amqp_msg'{payload = Payload}) ->
+    Payload.
 
 %%%===================================================================
 %%% Internal functions

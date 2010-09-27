@@ -47,8 +47,13 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(Info, State) ->
-    io:format("Received unexpected info: ~p~n", [Info]),
-    {noreply, State}.
+    case rabbit_client:is_amqp_message(Info) of
+        true ->
+            handle_amqp_message(Info, State);
+        false ->
+            io:format("Received unexpected info: ~p~n", [Info]),
+            {noreply, State}
+    end.
 
 terminate(Reason, #state{connection = Connection, channel = Channel}) ->
     io:format("Shutting down (reason: ~p)~n", [Reason]),
@@ -62,3 +67,9 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+handle_amqp_message(Message, State) ->
+    RawContent = rabbit_client:get_content(Message),
+    DecodedContent = json:decode(RawContent),
+    io:format("~p~n", [DecodedContent]),
+    {noreply, State}.
