@@ -49,7 +49,7 @@ handle_cast(Msg, State) ->
 handle_info(Info, State) ->
     case rabbit_client:is_amqp_message(Info) of
         true ->
-            handle_amqp_message(Info, State);
+            handle_raw_amqp_message(Info, State);
         false ->
             io:format("Received unexpected info: ~p~n", [Info]),
             {noreply, State}
@@ -68,8 +68,14 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
-handle_amqp_message(Message, State) ->
+handle_raw_amqp_message(Message, State) ->
+    Topic = rabbit_client:get_topic(Message),
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
-    io:format("~p~n", [DecodedContent]),
+    io:format("~p, ~p~n", [Topic, DecodedContent]),
+    handle_message(Topic, DecodedContent, State).
+
+handle_message(<<"life.board.add">>, Props, State) ->
+    Cells = proplists:get_value(cells, Props),
+    io:format("Got cells: ~p~n", [Cells]),
     {noreply, State}.

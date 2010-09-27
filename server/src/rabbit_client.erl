@@ -10,6 +10,7 @@
          bind_queue/4,
          subscribe_to_queue/2,
          is_amqp_message/1,
+         get_topic/1,
          get_content/1]).
 
 -include("amqp_client.hrl").
@@ -57,6 +58,11 @@ is_amqp_message({#'basic.deliver'{}, #'amqp_msg'{}}) ->
     true;
 is_amqp_message(_) ->
     false.
+
+get_topic({#'basic.deliver'{} = Tag, #'amqp_msg'{}}) ->
+    get_topic(Tag);
+get_topic(#'basic.deliver'{routing_key = RoutingKey}) ->
+    RoutingKey.
 
 get_content({#'basic.deliver'{}, #'amqp_msg'{} = Msg}) ->
     get_content(Msg);
