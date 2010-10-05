@@ -11,7 +11,7 @@
 -include("logging.hrl").
 
 -define(SERVER, ?MODULE).
--define(TICK_INTERVAL, 2000). % in milliseconds
+-define(TICK_INTERVAL, 500). % in milliseconds
 
 -record(state, {board, tick_timer, connection, channel}).
 

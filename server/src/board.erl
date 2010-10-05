@@ -78,7 +78,7 @@ next_state(undefined, Neighbours) ->
     case length(Neighbours) =:= 3 of
         true ->
             %% a new cell is born
-            <<"#0000ff">>;
+            blend_colours(Neighbours);
         false ->
             undefined
     end;
@@ -94,4 +94,34 @@ next_state(Cell, Neighbours) ->
         N when N >= 4 ->
             %% dies of overpopulation
             undefined
+    end.
+
+blend_colours(Cells) ->
+    Colours = [hex_to_rgb(HexColour) || HexColour <- Cells],
+    Aggregate = lists:foldl(fun({rgb, R, G, B}, {rgb, OutR, OutG, OutB}) ->
+                                    {rgb, OutR + R, OutG + G, OutB + B}
+                            end, {rgb, 0, 0, 0}, Colours),
+    Num = length(Colours),
+    {rgb, AggR, AggG, AggB} = Aggregate,
+    rgb_to_hex({rgb, round(AggR/Num), round(AggG/Num), round(AggB/Num)}).
+
+%% hex_to_rgb(<<"#FC3A80">>) -> {rgb, 252, 58, 128}
+hex_to_rgb(Bin) ->
+    Str = binary_to_list(Bin),
+    R = hexstr_to_int(string:sub_string(Str, 2, 3)),
+    G = hexstr_to_int(string:sub_string(Str, 4, 5)),
+    B = hexstr_to_int(string:sub_string(Str, 6, 7)),
+    {rgb, R, G, B}.
+
+%% rgb_to_hex({rgb, 252, 58, 128}) -> <<"#FC3A80">>
+rgb_to_hex({rgb, R, G, B}) ->
+    list_to_binary(["#", int_to_hexstr(R), int_to_hexstr(G), int_to_hexstr(B)]).
+
+hexstr_to_int(Str) ->
+    httpd_util:hexlist_to_integer(Str).
+int_to_hexstr(Int) ->
+    Str = httpd_util:integer_to_hexlist(Int),
+    case length(Str) of
+        1 -> "0" ++ Str;
+        _ -> Str
     end.
