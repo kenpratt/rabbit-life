@@ -4,13 +4,16 @@
 
 -export([start/2, stop/1]).
 
+-include("logging.hrl").
+
 start(_StartType, _StartArgs) ->
+    ?log_info("Starting life server", []),
     case life_sup:start_link() of
         {ok, Pid} ->
-            io:format("Life server started~n", []),
+            ?log_info("Life server started", []),
             {ok, Pid};
         Other ->
-            io:format("Life server failed to start: ~p~n", [Other]),
+            ?log_error("Life server failed to start: ~p", [Other]),
             {error, Other}
     end.
 

@@ -8,6 +8,8 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
+-include("logging.hrl").
+
 -define(SERVER, ?MODULE).
 
 -record(state, {connection, channel}).
@@ -35,15 +37,15 @@ init([]) ->
     %% deliver new AMQP messages to our Erlang inbox
     rabbit_client:subscribe_to_queue(<<"board_changes">>, Channel),
 
-    io:format("Board started~n", []),
+    ?log_info("Board started", []),
     {ok, #state{connection = Connection, channel = Channel}}.
 
 handle_call(Request, _From, State) ->
-    io:format("Received unexpected call: ~p~n", [Request]),
+    ?log_info("Received unexpected call: ~p", [Request]),
     {reply, ok, State}.
 
 handle_cast(Msg, State) ->
-    io:format("Received unexpected cast: ~p~n", [Msg]),
+    ?log_info("Received unexpected cast: ~p", [Msg]),
     {noreply, State}.
 
 handle_info(Info, State) ->
@@ -51,12 +53,12 @@ handle_info(Info, State) ->
         true ->
             handle_raw_amqp_message(Info, State);
         false ->
-            io:format("Received unexpected info: ~p~n", [Info]),
+            ?log_info("Received unexpected info: ~p", [Info]),
             {noreply, State}
     end.
 
 terminate(Reason, #state{connection = Connection, channel = Channel}) ->
-    io:format("Shutting down (reason: ~p)~n", [Reason]),
+    ?log_info("Shutting down (reason: ~p)", [Reason]),
     rabbit_client:close_channel(Channel),
     rabbit_client:close_connection(Connection),
     ok.
@@ -72,10 +74,10 @@ handle_raw_amqp_message(Message, State) ->
     Topic = rabbit_client:get_topic(Message),
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
-    io:format("~p, ~p~n", [Topic, DecodedContent]),
+    ?log_info("~p, ~p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
 handle_message(<<"life.board.add">>, Props, State) ->
     Cells = proplists:get_value(cells, Props),
-    io:format("Got cells: ~p~n", [Cells]),
+    ?log_info("Got cells: ~p", [Cells]),
     {noreply, State}.

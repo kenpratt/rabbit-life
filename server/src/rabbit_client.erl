@@ -13,6 +13,7 @@
          get_topic/1,
          get_content/1]).
 
+-include("logging.hrl").
 -include("amqp_client.hrl").
 
 %%%===================================================================
@@ -31,7 +32,7 @@ open_channel(Connection) when is_pid(Connection) ->
     Channel.
 
 close_channel(Channel) when is_pid(Channel) ->
-    io:format("channel closed~n", []),
+    ?log_info("Channel closed", []),
     ok = amqp_channel:close(Channel).
 
 create_exchange(Name, Type, Channel) when is_binary(Name), is_binary(Type), is_pid(Channel) ->

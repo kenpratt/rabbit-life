@@ -1,7 +1,11 @@
+require 'rake/clean'
+
 BASE_DIR = File.expand_path(File.dirname(__FILE__))
 RABBIT_SERVER_DIR = File.join(BASE_DIR, "vendor", "rabbitmq-server")
 RABBIT_CLIENT_DIR = File.join(BASE_DIR, "vendor", "rabbitmq-erlang-client")
 POLICY_SERVER_DIR = File.join(BASE_DIR, "vendor", "policy-server")
+
+CLEAN.include(["ebin/*.beam", "*.dump"])
 
 desc "Build the RabbitMQ server"
 task :build_rabbit_server do
@@ -15,7 +19,7 @@ end
 
 desc "Build the Life server"
 task :build_life_server do
-  sh "cd #{BASE_DIR} && ERL_LIBS=\"#{File.join(RABBIT_CLIENT_DIR, "deps")}\" erlc -o ebin -I #{File.join(RABBIT_CLIENT_DIR, "include")} src/*.erl"
+  sh "cd #{BASE_DIR} && ERL_LIBS=\"#{File.join(RABBIT_CLIENT_DIR, "deps")}\" erlc -o ebin -I #{File.join(BASE_DIR, "include")} -I #{File.join(RABBIT_CLIENT_DIR, "include")} src/*.erl"
 end
 
 desc "Start the RabbitMQ server"
