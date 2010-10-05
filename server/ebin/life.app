@@ -3,6 +3,7 @@
   {vsn, "0.1"},
   {modules, [life_app,
              life_sup,
+             life_server,
              board,
              rabbit_client,
              reloader,

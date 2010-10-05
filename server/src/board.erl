@@ -1,107 +1,29 @@
 -module(board).
 
--behaviour(gen_server).
-
 %% API
--export([start_link/0]).
-
-%% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([new/0,
+         get_cell/3,
+         set_cell/4,
+         set_cells/2,
+         tick/1,
+         to_proplist/1]).
 
 -include("logging.hrl").
 
--define(SERVER, ?MODULE).
--define(TICK_INTERVAL, 3000). % in milliseconds
+-define(WIDTH, 100).
+-define(HEIGHT, 100).
 
--record(state, {board, tick_timer, connection, channel}).
+-define(MAX_X, ?WIDTH - 1).
+-define(MAX_Y, ?HEIGHT - 1).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
-
-%%%===================================================================
-%%% gen_server callbacks
-%%%===================================================================
-
-init([]) ->
-    Connection = rabbit_client:open_connection(),
-    Channel = rabbit_client:open_channel(Connection),
-
-    %% set up RabbitMQ (operations are idempotent)
-    rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
-    rabbit_client:create_queue(<<"board_changes">>, Channel),
-    rabbit_client:bind_queue(<<"life">>, <<"board_changes">>, <<"life.board.add">>, Channel),
-
-    %% deliver new AMQP messages to our Erlang inbox
-    rabbit_client:subscribe_to_queue(<<"board_changes">>, Channel),
-
-    ?log_info("Board started", []),
-    {ok, TRef} = timer:send_interval(?TICK_INTERVAL, tick),
-    {ok, #state{board = new_board(), tick_timer = TRef, connection = Connection, channel = Channel}}.
-
-handle_call(Request, _From, State) ->
-    ?log_info("Received unexpected call: ~p", [Request]),
-    {reply, ok, State}.
-
-handle_cast(Msg, State) ->
-    ?log_info("Received unexpected cast: ~p", [Msg]),
-    {noreply, State}.
-
-handle_info(tick, #state{board = Board} = State) ->
-    ?log_info("Tick", []),
-    Board2 = tick_board(Board),
-    State2 = State#state{board = Board2},
-    broadcast_updated_board(State2),
-    {noreply, State2};
-
-handle_info(Info, State) ->
-    case rabbit_client:is_amqp_message(Info) of
-        true ->
-            handle_raw_amqp_message(Info, State);
-        false ->
-            ?log_info("Received unexpected info: ~p", [Info]),
-            {noreply, State}
-    end.
-
-terminate(Reason, #state{tick_timer = TRef, connection = Connection, channel = Channel}) ->
-    ?log_info("Shutting down (reason: ~p)", [Reason]),
-    timer:cancel(TRef),
-    rabbit_client:close_channel(Channel),
-    rabbit_client:close_connection(Connection),
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
-
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================
-
-handle_raw_amqp_message(Message, State) ->
-    Topic = rabbit_client:get_topic(Message),
-    RawContent = rabbit_client:get_content(Message),
-    DecodedContent = json:decode(RawContent),
-    ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
-    handle_message(Topic, DecodedContent, State).
-
-handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
-    Cells = proplists:get_value(cells, Props),
-    ?log_info("Got cells: ~p", [Cells]),
-    Board2 = set_cells(Cells, Board),
-    State2 = State#state{board = Board2},
-    broadcast_updated_board(State2),
-    {noreply, State2}.
-
-broadcast_updated_board(#state{board = Board, channel = Channel}) ->
-    rabbit_client:publish(<<"life">>, <<"life.board.update">>, json:encode(to_proplist(Board)), Channel).
-
-new_board() ->
+new() ->
     lists:foldl(fun(Y, A) ->
-                        array:set(Y, array:new(100), A)
-                end, array:new(100), lists:seq(0,99)).
+                        array:set(Y, array:new(?WIDTH), A)
+                end, array:new(?HEIGHT), lists:seq(0,?MAX_Y)).
 
 get_cell(X, Y, Board) ->
     case in_board(X, Y) of
@@ -111,9 +33,6 @@ get_cell(X, Y, Board) ->
         false ->
             undefined
     end.
-
-in_board(X, Y) ->
-    X >= 0 andalso X =< 99 andalso Y >= 0 andalso Y =< 99.
 
 set_cell(X, Y, Colour, Board) ->
     Row = array:get(Y, Board),
@@ -125,12 +44,20 @@ set_cells([], Board) ->
 set_cells([Cell|Rest], Board) ->
     set_cells(Rest, set_cell(proplists:get_value(x, Cell), proplists:get_value(y, Cell), proplists:get_value(c, Cell), Board)).
 
+tick(Board) ->
+    tick_cell(0, 0, Board, Board).
+
 to_proplist(Board) ->
     Cells = lists:append([[[{x,X},{y,Y},{c,C}] || {X, C} <- array:sparse_to_orddict(Row)] || {Y, Row} <- array:sparse_to_orddict(Board)]),
     [{board, [{cells, Cells}]}].
 
-tick_board(Board) ->
-    tick_cell(0, 0, Board, Board).
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
+
+in_board(X, Y) ->
+    X >= 0 andalso X =< ?MAX_X andalso Y >= 0 andalso Y =< ?MAX_Y.
+
 tick_cell(0, 100, _OldBoard, NewBoard) ->
     NewBoard;
 tick_cell(100, Y, OldBoard, NewBoard) ->
@@ -155,6 +82,7 @@ next_state(undefined, Neighbours) ->
         false ->
             undefined
     end;
+
 next_state(Cell, Neighbours) ->
     case length(Neighbours) of
         N when N =< 1 ->
