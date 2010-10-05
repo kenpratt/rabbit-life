@@ -11,8 +11,9 @@
 -include("logging.hrl").
 
 -define(SERVER, ?MODULE).
+-define(TICK_INTERVAL, 10000). % in milliseconds
 
--record(state, {connection, channel}).
+-record(state, {tick_timer, connection, channel}).
 
 %%%===================================================================
 %%% API
@@ -38,7 +39,8 @@ init([]) ->
     rabbit_client:subscribe_to_queue(<<"board_changes">>, Channel),
 
     ?log_info("Board started", []),
-    {ok, #state{connection = Connection, channel = Channel}}.
+    {ok, TRef} = timer:send_interval(?TICK_INTERVAL, tick),
+    {ok, #state{tick_timer = TRef, connection = Connection, channel = Channel}}.
 
 handle_call(Request, _From, State) ->
     ?log_info("Received unexpected call: ~p", [Request]),
@@ -47,6 +49,10 @@ handle_call(Request, _From, State) ->
 handle_cast(Msg, State) ->
     ?log_info("Received unexpected cast: ~p", [Msg]),
     {noreply, State}.
+
+handle_info(tick, State) ->
+    ?log_info("Tick", []),
+    {noreply, State};
 
 handle_info(Info, State) ->
     case rabbit_client:is_amqp_message(Info) of
@@ -57,8 +63,9 @@ handle_info(Info, State) ->
             {noreply, State}
     end.
 
-terminate(Reason, #state{connection = Connection, channel = Channel}) ->
+terminate(Reason, #state{tick_timer = TRef, connection = Connection, channel = Channel}) ->
     ?log_info("Shutting down (reason: ~p)", [Reason]),
+    timer:cancel(TRef),
     rabbit_client:close_channel(Channel),
     rabbit_client:close_connection(Connection),
     ok.
@@ -74,7 +81,7 @@ handle_raw_amqp_message(Message, State) ->
     Topic = rabbit_client:get_topic(Message),
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
-    ?log_info("~p, ~p", [Topic, DecodedContent]),
+    ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
 handle_message(<<"life.board.add">>, Props, State) ->
