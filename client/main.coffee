@@ -48,7 +48,6 @@ definition = () ->
             log("Loaded")
         MQ.on "connect", () ->
             log("Connected")
-            setTimeout(root.tick, 100)
         MQ.on "disconnect", () ->
             log("Disconnected")
         MQ.topic("life")
@@ -122,11 +121,3 @@ definition = () ->
 app = $.sammy("#main", definition)
 
 client.init = init
-
-root.tick = () ->
-    log("tick")
-    rand = ((x) -> Math.floor(Math.random() * x))
-    randColour = (() -> "#" + rand(256).toString(16) + rand(256).toString(16) + rand(256).toString(16))
-    cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...500]
-    MQ.exchange("life").publish({ board: { cells: cells } }, "life.board.update")
-    #setTimeout(root.tick, 1000)
