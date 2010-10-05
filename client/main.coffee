@@ -54,7 +54,7 @@ definition = () ->
         MQ.topic("life")
         MQ.queue("auto").callback (m) ->
             log("Error: no binding matches", m)
-        MQ.queue("auto").bind("life", "board.*").callback (m) ->
+        MQ.queue("auto").bind("life", "life.board.update").callback (m) ->
             context.trigger("update-board", m)
 
         swfobject.embedSWF(
@@ -98,7 +98,6 @@ definition = () ->
                         for dx in [0...s.width] when s.grid[dy][dx]
                             cells.push({x: x + dx, y: y + dy, c: "#ff0000"})
                     MQ.exchange("life").publish({ cells: cells }, "life.board.add")
-                    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update")
             })
 
     this.bind "update-board", (e, m) ->
@@ -129,5 +128,5 @@ root.tick = () ->
     rand = ((x) -> Math.floor(Math.random() * x))
     randColour = (() -> "#" + rand(256).toString(16) + rand(256).toString(16) + rand(256).toString(16))
     cells = {x:rand(100), y:rand(100), c:randColour()} for i in [0...500]
-    MQ.exchange("life").publish({ board: { cells: cells } }, "board.update")
+    MQ.exchange("life").publish({ board: { cells: cells } }, "life.board.update")
     #setTimeout(root.tick, 1000)

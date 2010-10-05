@@ -84,12 +84,13 @@ handle_raw_amqp_message(Message, State) ->
     ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
-handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
+handle_message(<<"life.board.add">>, Props, #state{board = Board, channel = Channel} = State) ->
     Cells = proplists:get_value(cells, Props),
     ?log_info("Got cells: ~p", [Cells]),
     Board2 = set_cells(Cells, Board),
     ?log_info("Board: ~n~p", [Board2]),
     ?log_info("Board: ~n~p", [to_proplist(Board2)]),
+    rabbit_client:publish(<<"life">>, <<"life.board.update">>, json:encode(to_proplist(Board2)), Channel),
     {noreply, State#state{board = Board2}}.
 
 new_board() ->

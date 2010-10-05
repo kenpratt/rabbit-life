@@ -9,6 +9,7 @@
          create_queue/2,
          bind_queue/4,
          subscribe_to_queue/2,
+         publish/4,
          is_amqp_message/1,
          get_topic/1,
          get_content/1]).
@@ -54,6 +55,12 @@ subscribe_to_queue(Queue, Channel) when is_binary(Queue), is_pid(Channel) ->
     Cmd = #'basic.consume'{queue = Queue},
     #'basic.consume_ok'{consumer_tag = ConsumerTag} = amqp_channel:subscribe(Channel, Cmd, self()),
     ConsumerTag.
+
+publish(Exchange, Key, Message, Channel) when is_binary(Exchange), is_binary(Key), is_binary(Message), is_pid(Channel) ->
+    Publish = #'basic.publish'{exchange = Exchange, routing_key = Key},
+    Res = amqp_channel:call(Channel, Publish, #amqp_msg{payload = Message}),
+    io:format("~p~n", [Res]),
+    ok.
 
 is_amqp_message({#'basic.deliver'{}, #'amqp_msg'{}}) ->
     true;

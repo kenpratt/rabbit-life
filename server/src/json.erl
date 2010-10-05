@@ -8,7 +8,7 @@
 %%%===================================================================
 
 encode(Term) ->
-    mochijson2:encode(pack(Term)).
+    list_to_binary(mochijson2:encode(pack(Term))).
 
 decode(Raw) when is_binary(Raw) ->
     unpack(mochijson2:decode(Raw)).
