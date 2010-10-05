@@ -13,7 +13,7 @@
 -define(SERVER, ?MODULE).
 -define(TICK_INTERVAL, 10000). % in milliseconds
 
--record(state, {tick_timer, connection, channel}).
+-record(state, {board, tick_timer, connection, channel}).
 
 %%%===================================================================
 %%% API
@@ -40,7 +40,7 @@ init([]) ->
 
     ?log_info("Board started", []),
     {ok, TRef} = timer:send_interval(?TICK_INTERVAL, tick),
-    {ok, #state{tick_timer = TRef, connection = Connection, channel = Channel}}.
+    {ok, #state{board = new_board(), tick_timer = TRef, connection = Connection, channel = Channel}}.
 
 handle_call(Request, _From, State) ->
     ?log_info("Received unexpected call: ~p", [Request]),
@@ -84,7 +84,29 @@ handle_raw_amqp_message(Message, State) ->
     ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
-handle_message(<<"life.board.add">>, Props, State) ->
+handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
     Cells = proplists:get_value(cells, Props),
     ?log_info("Got cells: ~p", [Cells]),
-    {noreply, State}.
+    Board2 = set_cells(Cells, Board),
+    ?log_info("Board: ~n~p", [Board2]),
+    {noreply, State#state{board = Board2}}.
+
+new_board() ->
+    lists:foldl(fun(Y, A) ->
+                        array:set(Y, array:new(100), A)
+                end, array:new(100), lists:seq(0,99)).
+
+get_cell(X, Y, Board) ->
+    Row = array:get(Y, Board),
+    array:get(X, Row).
+
+set_cell(X, Y, Colour, Board) ->
+    ?log_info("Setting ~p,~p to ~p", [X, Y, Colour]),
+    Row = array:get(Y, Board),
+    Row2 = array:set(X, Colour, Row),
+    array:set(Y, Row2, Board).
+
+set_cells([], Board) ->
+    Board;
+set_cells([Cell|Rest], Board) ->
+    set_cells(Rest, set_cell(proplists:get_value(x, Cell), proplists:get_value(y, Cell), proplists:get_value(c, Cell), Board)).
