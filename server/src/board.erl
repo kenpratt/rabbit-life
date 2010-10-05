@@ -89,6 +89,7 @@ handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
     ?log_info("Got cells: ~p", [Cells]),
     Board2 = set_cells(Cells, Board),
     ?log_info("Board: ~n~p", [Board2]),
+    ?log_info("Board: ~n~p", [to_proplist(Board2)]),
     {noreply, State#state{board = Board2}}.
 
 new_board() ->
@@ -110,3 +111,7 @@ set_cells([], Board) ->
     Board;
 set_cells([Cell|Rest], Board) ->
     set_cells(Rest, set_cell(proplists:get_value(x, Cell), proplists:get_value(y, Cell), proplists:get_value(c, Cell), Board)).
+
+to_proplist(Board) ->
+    Cells = lists:append([[[{x,X},{y,Y},{c,C}] || {X, C} <- array:sparse_to_orddict(Row)] || {Y, Row} <- array:sparse_to_orddict(Board)]),
+    [{board, [{cells, Cells}]}].
