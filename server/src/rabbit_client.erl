@@ -58,9 +58,7 @@ subscribe_to_queue(Queue, Channel) when is_binary(Queue), is_pid(Channel) ->
 
 publish(Exchange, Key, Message, Channel) when is_binary(Exchange), is_binary(Key), is_binary(Message), is_pid(Channel) ->
     Publish = #'basic.publish'{exchange = Exchange, routing_key = Key},
-    Res = amqp_channel:call(Channel, Publish, #amqp_msg{payload = Message}),
-    io:format("~p~n", [Res]),
-    ok.
+    ok = amqp_channel:call(Channel, Publish, #amqp_msg{payload = Message}).
 
 is_amqp_message({#'basic.deliver'{}, #'amqp_msg'{}}) ->
     true;

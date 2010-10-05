@@ -11,7 +11,7 @@
 -include("logging.hrl").
 
 -define(SERVER, ?MODULE).
--define(TICK_INTERVAL, 10000). % in milliseconds
+-define(TICK_INTERVAL, 3000). % in milliseconds
 
 -record(state, {board, tick_timer, connection, channel}).
 
@@ -50,9 +50,12 @@ handle_cast(Msg, State) ->
     ?log_info("Received unexpected cast: ~p", [Msg]),
     {noreply, State}.
 
-handle_info(tick, State) ->
+handle_info(tick, #state{board = Board} = State) ->
     ?log_info("Tick", []),
-    {noreply, State};
+    Board2 = tick_board(Board),
+    State2 = State#state{board = Board2},
+    broadcast_updated_board(State2),
+    {noreply, State2};
 
 handle_info(Info, State) ->
     case rabbit_client:is_amqp_message(Info) of
@@ -84,14 +87,16 @@ handle_raw_amqp_message(Message, State) ->
     ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
-handle_message(<<"life.board.add">>, Props, #state{board = Board, channel = Channel} = State) ->
+handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
     Cells = proplists:get_value(cells, Props),
     ?log_info("Got cells: ~p", [Cells]),
     Board2 = set_cells(Cells, Board),
-    ?log_info("Board: ~n~p", [Board2]),
-    ?log_info("Board: ~n~p", [to_proplist(Board2)]),
-    rabbit_client:publish(<<"life">>, <<"life.board.update">>, json:encode(to_proplist(Board2)), Channel),
-    {noreply, State#state{board = Board2}}.
+    State2 = State#state{board = Board2},
+    broadcast_updated_board(State2),
+    {noreply, State2}.
+
+broadcast_updated_board(#state{board = Board, channel = Channel}) ->
+    rabbit_client:publish(<<"life">>, <<"life.board.update">>, json:encode(to_proplist(Board)), Channel).
 
 new_board() ->
     lists:foldl(fun(Y, A) ->
@@ -99,11 +104,18 @@ new_board() ->
                 end, array:new(100), lists:seq(0,99)).
 
 get_cell(X, Y, Board) ->
-    Row = array:get(Y, Board),
-    array:get(X, Row).
+    case in_board(X, Y) of
+        true ->
+            Row = array:get(Y, Board),
+            array:get(X, Row);
+        false ->
+            undefined
+    end.
+
+in_board(X, Y) ->
+    X >= 0 andalso X =< 99 andalso Y >= 0 andalso Y =< 99.
 
 set_cell(X, Y, Colour, Board) ->
-    ?log_info("Setting ~p,~p to ~p", [X, Y, Colour]),
     Row = array:get(Y, Board),
     Row2 = array:set(X, Colour, Row),
     array:set(Y, Row2, Board).
@@ -116,3 +128,42 @@ set_cells([Cell|Rest], Board) ->
 to_proplist(Board) ->
     Cells = lists:append([[[{x,X},{y,Y},{c,C}] || {X, C} <- array:sparse_to_orddict(Row)] || {Y, Row} <- array:sparse_to_orddict(Board)]),
     [{board, [{cells, Cells}]}].
+
+tick_board(Board) ->
+    tick_cell(0, 0, Board, Board).
+tick_cell(0, 100, _OldBoard, NewBoard) ->
+    NewBoard;
+tick_cell(100, Y, OldBoard, NewBoard) ->
+    tick_cell(0, Y+1, OldBoard, NewBoard);
+tick_cell(X, Y, OldBoard, NewBoard) ->
+    Neighbours = live_neighbours(X, Y, OldBoard),
+    Cell = get_cell(X, Y, OldBoard),
+    Cell2 = next_state(Cell, Neighbours),
+    NewBoard2 = set_cell(X, Y, Cell2, NewBoard),
+    tick_cell(X+1, Y, OldBoard, NewBoard2).
+
+live_neighbours(X, Y, Board) ->
+    Positions = [{X-1,Y-1}, {X,Y-1}, {X+1,Y-1}, {X-1,Y}, {X+1,Y}, {X-1,Y+1}, {X,Y+1}, {X+1,Y+1}],
+    Neighbours = [get_cell(NX, NY, Board) || {NX, NY} <- Positions],
+    lists:filter(fun(E) -> E =/= undefined end, Neighbours).
+
+next_state(undefined, Neighbours) ->
+    case length(Neighbours) =:= 3 of
+        true ->
+            %% a new cell is born
+            <<"#0000ff">>;
+        false ->
+            undefined
+    end;
+next_state(Cell, Neighbours) ->
+    case length(Neighbours) of
+        N when N =< 1 ->
+            %% dies of loneliness
+            undefined;
+        N when N =:= 2 orelse N =:= 3 ->
+            %% lives
+            Cell;
+        N when N >= 4 ->
+            %% dies of overpopulation
+            undefined
+    end.
