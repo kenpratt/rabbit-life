@@ -98,6 +98,9 @@ definition = () ->
                             cells.push({x: x + dx, y: y + dy, c: $("#colour").attr("value")})
                     MQ.exchange("life").publish({ cells: cells }, "life.board.add")
             })
+            $("#colour").change(() ->
+                c = $("#colour").attr("value")
+                $(".cell-on").css("background-color", c))
 
     this.bind "update-board", (e, m) ->
         log("board update")

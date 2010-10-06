@@ -13,9 +13,9 @@
             <tr>
               <% for (var x=0; x < s.width; x++) { %>
                 <% if (s.grid[y][x]) { %>
-                  <td><div class="cell" style="background-color:red"></div></td>
+                  <td><div class="cell cell-on" style="background-color:red"></div></td>
                 <% } else { %>
-                  <td><div class="cell" style="background-color:white"></div></td>
+                  <td><div class="cell cell-off" style="background-color:white"></div></td>
                 <% } %>
               <% } %>
             </tr>
