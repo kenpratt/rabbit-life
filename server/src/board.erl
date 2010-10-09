@@ -58,9 +58,9 @@ to_proplist(Board) ->
 in_board(X, Y) ->
     X >= 0 andalso X =< ?MAX_X andalso Y >= 0 andalso Y =< ?MAX_Y.
 
-tick_cell(0, 100, _OldBoard, NewBoard) ->
+tick_cell(0, ?HEIGHT, _OldBoard, NewBoard) ->
     NewBoard;
-tick_cell(100, Y, OldBoard, NewBoard) ->
+tick_cell(?WIDTH, Y, OldBoard, NewBoard) ->
     tick_cell(0, Y+1, OldBoard, NewBoard);
 tick_cell(X, Y, OldBoard, NewBoard) ->
     Neighbours = live_neighbours(X, Y, OldBoard),

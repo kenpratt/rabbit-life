@@ -109,7 +109,7 @@ raw_patterns = {
                    __XX_"
         }
         {
-            id: "pattern-w-lwss"
+            id: "pattern-e-lwss"
             name: "Spaceship (E)"
             grid: "__XX_
                    _XXXX
