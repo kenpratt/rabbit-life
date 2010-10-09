@@ -12,7 +12,7 @@
       <% $.each(list, function(i, s) { %>
         <div class="pattern-container">
           <h6><%= s.name %></h6>
-          <div id="<%= s.id %>" class="pattern" style="width:<%= s.width * 5 %>">
+          <div id="<%= s.id %>" class="pattern" style="width:<%= s.width * 5 %>" align="center">
             <table class="board">
               <% for (var y=0; y < s.height; y++) { %>
                 <tr>

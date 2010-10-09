@@ -2,7 +2,6 @@ body {
     margin: 0;
     padding: 0.5em;
     border-top: 5px solid #f50;
-    border-bottom: 5px solid #f50;
     color: #333;
 }
 
@@ -12,20 +11,18 @@ h1,h2,h3,h4,h5,h6 {
     padding: 0;
 }
 h1 {
-    padding: 0 0 0 40px;
+    padding-left: 40px;
     line-height: 1em;
     color: #f50;
     background: url('rabbit.png') no-repeat left center;
     letter-spacing: -1px;
 }
 h4 {
-    margin: 0 0 0.5em 0;
     padding: 0.2em 0.5em;
     background: #999;
     color: #fff;
 }
 h5 {
-    margin: 0 0 0.5em 0;
     padding: 0.2em 0.5em;
     background: #bbb;
     color: #fff;
@@ -33,10 +30,10 @@ h5 {
 
 #sidebar {
    float: left;
-   width: 12em;
+   width: 195px;
 }
 #content {
-   margin-left: 13em;
+   margin-left: 205px;
 }
 
 .board {
@@ -68,9 +65,13 @@ h5 {
 .pattern-container {
     float: left;
     margin: 0 0.5em 0.5em 0;
+    text-align: center;
 }
 .pattern-container h6 {
     font-weight: normal;
     margin: 0;
     padding: 0;
+}
+.pattern {
+    padding: 0 0 2px 2px;
 }

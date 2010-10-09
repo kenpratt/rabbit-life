@@ -58,7 +58,7 @@ definition = () ->
 
     this.get "#/game", () ->
         log("processing GET #/game")
-        this.render "game.ejs", { width: 100, height: 100, patterns: patterns }, (rendered) ->
+        this.render "game.ejs", { width: 200, height: 200, patterns: patterns }, (rendered) ->
             log("game rendered")
             this.event_context.swap(rendered)
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })

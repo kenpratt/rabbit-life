@@ -10,8 +10,8 @@
 
 -include("logging.hrl").
 
--define(WIDTH, 100).
--define(HEIGHT, 100).
+-define(WIDTH, 200).
+-define(HEIGHT, 200).
 
 -define(MAX_X, ?WIDTH - 1).
 -define(MAX_Y, ?HEIGHT - 1).
