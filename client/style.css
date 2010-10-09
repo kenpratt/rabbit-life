@@ -2,6 +2,22 @@ body {
     margin: 0;
     padding: 1em;
 }
+
+h4 {
+    margin: 0 0 0.5em 0;
+}
+h5 {
+    margin: 0 0 0.5em 0;
+}
+
+#sidebar {
+   float: left;
+   width: 12em;
+}
+#content {
+   margin-left: 13em;
+}
+
 .board {
     background: #ddd;
     border-spacing: 1px;
@@ -18,4 +34,27 @@ body {
 }
 .cell.on {
     background: #333;
+}
+
+#colour-picker {
+    margin: 0 0 1em 0;
+}
+
+.pattern-section {
+    clear: both;
+}
+.pattern-section h5 {
+    background: #ccc;
+    color: #fff;
+    margin-left: -0.25em;
+    padding: 0.25em 0.5em;
+}
+
+.pattern-container {
+    float: left;
+    margin: 0 0.5em 0.5em 0;
+}
+.pattern-container h6 {
+    margin: 0;
+    padding: 0;
 }

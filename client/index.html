@@ -5,10 +5,9 @@
    <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <div id="container">
-    <div id="main">
-      Loading...
-    </div>
+  <h2>Rabbit life</h2>
+  <div id="root">
+    Loading...
   </div>
 
   <div id="amqpWrapper"><div id="AMQPProxy"></div></div>
@@ -17,9 +16,9 @@
     $(document).ready ->
         $.get "patterns.coffee", (data) ->
             eval(CoffeeScript.compile(data))
-        $.get "main.coffee", (data) ->
-            eval(CoffeeScript.compile(data))
-            client.init()
+            $.get "main.coffee", (data) ->
+                eval(CoffeeScript.compile(data))
+                client.init()
   </script>
   <script src="vendor/jquery/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="vendor/jquery/jquery-ui/js/jquery-ui-1.8.5.custom.min.js" type="text/javascript" charset="utf-8"></script>

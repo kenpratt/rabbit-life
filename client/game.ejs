@@ -1,9 +1,11 @@
+<div id="sidebar">
 <div id="colour-picker">
-  <h5>Colour</h5>
+  <h4>Colour</h4>
   <input type="text" id="colour" value="#FF0000" />
 </div>
 
 <div id="patterns">
+  <h4>Patterns</h4>
   <% $.each(patterns,function(name, list) { %>
     <div class="pattern-section">
       <h5><%= name %></h5>
@@ -30,8 +32,9 @@
     </div>
   <% }) %>
 </div>
+</div>
 
-<h4>Board</h4>
+<div id="content">
 <div id="board-container">
   <table id="board" class="board">
     <% for (var y=0; y < height; y++) { %>
@@ -42,4 +45,5 @@
       </tr>
     <% } %>
   </table>
+</div>
 </div>

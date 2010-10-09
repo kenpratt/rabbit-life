@@ -58,8 +58,8 @@ definition = () ->
 
     this.get "#/game", () ->
         log("processing GET #/game")
-        this.render "board.ejs", { width: 100, height: 100, patterns: patterns }, (rendered) ->
-            log("board rendered")
+        this.render "game.ejs", { width: 100, height: 100, patterns: patterns }, (rendered) ->
+            log("game rendered")
             this.event_context.swap(rendered)
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
             $("#board-container").droppable({
@@ -100,6 +100,6 @@ definition = () ->
         diff = (new Date()).getTime() - start
         log("update took: ", diff)
 
-app = $.sammy("#main", definition)
+app = $.sammy("#root", definition)
 
 client.init = init

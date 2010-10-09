@@ -13,7 +13,26 @@ raw_patterns = {
         {
             id: "pattern-blinker",
             name: "Blinker",
-            grid: "XXX"
+            grid: "___
+                   XXX
+                   ___"
+        },
+        {
+            id: "pattern-pulsar",
+            name: "Pulsar",
+            grid: "__XXX___XXX__
+                   _____________
+                   X____X_X____X
+                   X____X_X____X
+                   X____X_X____X
+                   __XXX___XXX__
+                   _____________
+                   __XXX___XXX__
+                   X____X_X____X
+                   X____X_X____X
+                   X____X_X____X
+                   _____________
+                   __XXX___XXX__"
         }
     ],
     "Spaceships": [
@@ -47,7 +66,7 @@ raw_patterns = {
         },
         {
             id: "pattern-w-lwss",
-            name: "Lightweight spaceship (W)",
+            name: "Spaceship (W)",
             grid: "_XX__
                    XXXX_
                    XX_XX
@@ -55,7 +74,7 @@ raw_patterns = {
         },
         {
             id: "pattern-w-lwss",
-            name: "Lightweight spaceship (E)",
+            name: "Spaceship (E)",
             grid: "__XX_
                    _XXXX
                    XX_XX
