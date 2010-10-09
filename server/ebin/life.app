@@ -5,6 +5,8 @@
              life_sup,
              life_server,
              board,
+             player_manager,
+             player_registry,
              rabbit_client,
              reloader,
              json,

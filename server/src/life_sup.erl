@@ -16,7 +16,9 @@ start_link() ->
 init([]) ->
     LifeServer = {life_server, {life_server, start_link, []},
                   permanent, 2000, worker, dynamic},
+    PlayerManager = {player_manager, {player_manager, start_link, []},
+                     permanent, 2000, worker, dynamic},
 
-    Children = [LifeServer],
+    Children = [LifeServer, PlayerManager],
     RestartStrategy = {one_for_one, 4, 3600},
     {ok, {RestartStrategy, Children}}.
