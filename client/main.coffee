@@ -13,20 +13,44 @@ state = {
     uuid: null
     nick: null
     colour: null
+    connected: false
     registered: false
+    dirty_cells: []
 }
 
 definition = () ->
     this.use(Sammy.EJS);
     this.debug = true
 
-    dirty_cells = []
-
+    # initialize the client (called on first page load)
     this.bind "run", () ->
         log("init")
-        context = this
         state.uuid = uuid()
+        embedSwf()
 
+    # ensure connected & registered, no matter what page is requested
+    this.before () ->
+        if this.path is "#/connect"
+            # do nothing
+        else if !state.connected
+            log("not connected -- redirecting to /connect")
+            this.redirect("#/connect")
+            return false
+        else if this.path is "#/register"
+            # do nothing
+        else if !state.registered
+            log("not logged in -- redirecting to /register")
+            this.redirect("#/register")
+            return false
+
+    this.get "#/", () ->
+        log("GET #/")
+        this.redirect("#/game")
+
+    this.get "#/connect", () ->
+        log("GET #/connect")
+        this.swap("Connecting...")
+        context = this
         MQ.configure {
             logger: console,
             host: "0.0.0.0",
@@ -36,8 +60,12 @@ definition = () ->
             log("Loaded")
         MQ.on "connect", () ->
             log("Connected")
+            state.connected = true
+            context.redirect("#/register")
         MQ.on "disconnect", () ->
             log("Disconnected")
+            state.connected = false
+            # TODO show grey overlay on screen asking player to reload the game
         MQ.topic("life")
         MQ.queue("auto").callback (m) ->
             log("Error: no binding matches", m)
@@ -46,32 +74,13 @@ definition = () ->
         MQ.queue("auto").bind("life", "life.players.update").callback (m) ->
             context.trigger("update-players", m)
 
-        swfobject.embedSWF(
-            "vendor/amqp-js/swfs/amqp.swf?nc=" + Math.random().toString(),
-            "AMQPProxy",
-            "1",
-            "1",
-            "9",
-            "vendor/amqp-js/swfs/expressInstall.swf",
-            {},
-            {
-                allowScriptAccess: "always",
-                wmode: "transparent"
-            },
-            {},
-            () ->
-                log("Swfobject loaded")
-        )
-
-    this.get "#/", () ->
-        log("processing GET #/")
-        this.render "launch.ejs", {}, (rendered) ->
+    this.get "#/register", () ->
+        log("GET #/connect")
+        this.render "register.ejs", {}, (rendered) ->
             this.event_context.swap(rendered)
 
     this.post "#/register", () ->
-        log("processing POST #/register", this.params)
-        this.swap("Registering nick...")
-        # TODO register nick with server?
+        log("POST #/register", this.params)
         this.swap("Reticulating splines...")
         MQ.exchange("life").publish({ uuid: state.uuid, nick: this.params.nick, colour: this.params.colour }, "life.register")
         # TODO move to reps from reg req
@@ -81,13 +90,7 @@ definition = () ->
         this.redirect("#/game")
 
     this.get "#/game", () ->
-        log("processing GET #/game")
-
-        if (!state.registered)
-            log("not logged in -- redirecting to /")
-            this.redirect("#/")
-            return
-
+        log("GET #/game")
         this.render "game.ejs", { width: 200, height: 200, patterns: patterns, nick: state.nick, colour: state.colour }, (rendered) ->
             log("game rendered")
             this.event_context.swap(rendered)
@@ -112,26 +115,26 @@ definition = () ->
                 $(".cell-on").css("background-color", c))
 
     this.bind "update-board", (e, m) ->
-        log("board update")
+        log("update-board", e, m)
         start = (new Date()).getTime()
 
         # TODO optimize update by only modifying the cells that changed colour?
 
         # clear board
-        for c in dirty_cells
+        for c in state.dirty_cells
             $("#cell_" + c.x + "_" + c.y).css("background", "#ffffff")
 
         # set cells that came back from the server
         cells = m.data.board.cells
         for c in cells
             $("#cell_" + c.x + "_" + c.y).css("background", c.c)
-        dirty_cells = cells
+        state.dirty_cells = cells
 
         diff = (new Date()).getTime() - start
         log("update took: ", diff)
 
     this.bind "update-players", (e, m) ->
-        log("player list update")
+        log("update-players", e, m)
         start = (new Date()).getTime()
 
         console.log(m)
@@ -149,6 +152,24 @@ uuid = () ->
     s[12] = "4" # bits 12-15 of the time_hi_and_version field to 0010
     s[16] = hexDigits.substr((s[16] & 0x3) | 0x8, 1) # bits 6-7 of the clock_seq_hi_and_reserved to 01
     s.join("")
+
+embedSwf = () ->
+    swfobject.embedSWF(
+        "vendor/amqp-js/swfs/amqp.swf?nc=" + Math.random().toString(),
+        "AMQPProxy",
+        "1",
+        "1",
+        "9",
+        "vendor/amqp-js/swfs/expressInstall.swf",
+        {},
+        {
+            allowScriptAccess: "always",
+            wmode: "transparent"
+        },
+        {},
+        () ->
+            log("Swfobject loaded")
+        )
 
 app = $.sammy("#root", definition)
 
