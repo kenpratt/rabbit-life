@@ -11,8 +11,8 @@ init = () ->
 
 state = {
     uuid: null
-    nick: null
-    colour: null
+    nick: "Anonymouse"
+    colour: "#FF5500"
     connected: false
     registered: false
     dirty_cells: []
@@ -78,7 +78,7 @@ definition = () ->
 
     this.get "#/register", () ->
         log("GET #/connect")
-        this.render "register.ejs", {}, (rendered) ->
+        this.render "register.ejs", { nick: state.nick, colour: state.colour }, (rendered) ->
             this.event_context.swap(rendered)
 
     this.post "#/register", () ->
@@ -135,6 +135,9 @@ definition = () ->
     this.bind "update-players", (e, m) ->
         log("update-players", e, m)
         start = (new Date()).getTime()
+
+        this.render "players.ejs", { players: m.data.players }, (rendered) ->
+            $("#players").html(rendered)
 
         diff = (new Date()).getTime() - start
         log("update took: ", diff)

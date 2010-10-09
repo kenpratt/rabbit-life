@@ -86,3 +86,36 @@ h5 {
     float: left;
     width: 5em;
 }
+
+/* player list header */
+#root {
+    clear: both;
+}
+#header {
+    position: relative;
+}
+h1 {
+    width: 10em;
+}
+#players {
+    position: absolute;
+    top: 0;
+    left: 300px;
+}
+.player {
+    float: left;
+    height: 0.9em;
+    width: 5em;
+    padding-right: 0.5em;
+}
+.player .colour {
+    width: 0.7em;
+    height: 0.7em;
+    float: left;
+    border: 1px solid #ddd;
+    margin-right: 0.2em;
+}
+.player .nick {
+    font-size: 0.7em;
+    overflow: hidden;
+}

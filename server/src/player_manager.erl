@@ -52,6 +52,7 @@ handle_cast(Msg, State) ->
 
 handle_info(cull, #state{players = Players} = State) ->
     ?log_info("Cull", []),
+    broadcast_updated_players(State),
     case player_registry:cull(Players) of
         Players ->
             %% no change
