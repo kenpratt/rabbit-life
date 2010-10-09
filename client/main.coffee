@@ -73,6 +73,8 @@ definition = () ->
             context.trigger("update-board", m)
         MQ.queue("auto").bind("life", "life.players.update").callback (m) ->
             context.trigger("update-players", m)
+        MQ.queue("auto").bind("life", "life.player." + state.uuid).callback (m) ->
+            context.trigger("direct-message", m)
 
     this.get "#/register", () ->
         log("GET #/connect")
@@ -82,12 +84,9 @@ definition = () ->
     this.post "#/register", () ->
         log("POST #/register", this.params)
         this.swap("Reticulating splines...")
-        MQ.exchange("life").publish({ uuid: state.uuid, nick: this.params.nick, colour: this.params.colour }, "life.register")
-        # TODO move to reps from reg req
-        state.registered = true
         state.nick = this.params.nick
         state.colour = this.params.colour
-        this.redirect("#/game")
+        MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.register")
 
     this.get "#/game", () ->
         log("GET #/game")
@@ -137,10 +136,16 @@ definition = () ->
         log("update-players", e, m)
         start = (new Date()).getTime()
 
-        console.log(m)
-
         diff = (new Date()).getTime() - start
         log("update took: ", diff)
+
+    this.bind "direct-message", (e, m) ->
+        log("direct-message", e, m)
+        if m.data.registered is true
+            state.registered = true
+            this.redirect("#/game")
+        else
+            log("Error: don't know how to handle message", m)
 
 uuid = () ->
     # http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript

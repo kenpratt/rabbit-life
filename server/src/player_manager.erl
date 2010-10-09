@@ -99,8 +99,15 @@ handle_message(<<"life.register">>, Props, #state{players = Players} = State) ->
     ?log_info("New player: ~s, ~s (~s)", [Nick, Colour, Uuid]),
     Players2 = player_registry:add_player(Uuid, Nick, Colour, Players),
     State2 = State#state{players = Players2},
+    send_to_player(Uuid, [{registered, true}], State),
     broadcast_updated_players(State2),
     {noreply, State2}.
 
-broadcast_updated_players(#state{players = Players, channel = Channel}) ->
-    rabbit_client:publish(<<"life">>, <<"life.players.update">>, json:encode(player_registry:to_proplist(Players)), Channel).
+send_to_player(Uuid, Message, State) ->
+    publish(list_to_binary([<<"life.player.">>, Uuid]), Message, State).
+
+broadcast_updated_players(#state{players = Players} = State) ->
+    publish(<<"life.players.update">>, player_registry:to_proplist(Players), State).
+
+publish(Topic, Message, #state{channel = Channel}) ->
+    rabbit_client:publish(<<"life">>, Topic, json:encode(Message), Channel).
