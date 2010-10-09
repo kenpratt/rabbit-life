@@ -9,6 +9,12 @@ log = (args...) ->
 init = () ->
     app.run("#/")
 
+state = {
+    registered: false
+    nick: null
+    colour: null
+}
+
 definition = () ->
     this.use(Sammy.EJS);
     this.debug = true
@@ -54,11 +60,28 @@ definition = () ->
 
     this.get "#/", () ->
         log("processing GET #/")
-        this.swap("Welcome!<br/><a href=\"#/game\">Play</a>")
+        this.render "launch.ejs", {}, (rendered) ->
+            this.event_context.swap(rendered)
+
+    this.post "#/register", () ->
+        log("processing POST #/register", this.params)
+        this.swap("Registering nick...")
+        # TODO register nick with server?
+        this.swap("Reticulating splines...")
+        state.registered = true
+        state.nick = this.params.nick
+        state.colour = this.params.colour
+        this.redirect("#/game")
 
     this.get "#/game", () ->
         log("processing GET #/game")
-        this.render "game.ejs", { width: 200, height: 200, patterns: patterns }, (rendered) ->
+
+        if (!state.registered)
+            log("not logged in -- redirecting to /")
+            this.redirect("#/")
+            return
+
+        this.render "game.ejs", { width: 200, height: 200, patterns: patterns, nick: state.nick, colour: state.colour }, (rendered) ->
             log("game rendered")
             this.event_context.swap(rendered)
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })

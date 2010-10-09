@@ -10,13 +10,15 @@ h1,h2,h3,h4,h5,h6 {
     margin: 0 0 0.5em 0;
     padding: 0;
 }
+h1,h2,h3 {
+    color: #f50;
+    letter-spacing: -1px;
+}
 h1 {
     padding-left: 40px;
     line-height: 1em;
-    color: #f50;
     background: url('rabbit.png') no-repeat left center;
-    letter-spacing: -1px;
-}
+ }
 h4 {
     padding: 0.2em 0.5em;
     background: #999;
@@ -74,4 +76,13 @@ h5 {
 }
 .pattern {
     padding: 0 0 2px 2px;
+}
+
+#launch {
+    padding: 1em;
+}
+#launch label {
+    display: block;
+    float: left;
+    width: 5em;
 }
