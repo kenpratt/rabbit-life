@@ -9,27 +9,6 @@ log = (args...) ->
 init = () ->
     app.run("#/")
 
-snippets = {
-    "snippet-block": {
-        name: "Block",
-        width: 2,
-        height: 2,
-        grid: [[true, true], [true, true]]
-    },
-    "snippet-blinker": {
-        name: "Blinker",
-        width: 3,
-        height: 1,
-        grid: [[true, true, true]]
-    },
-    "snippet-se-glider": {
-        name: "Glider",
-        width: 3,
-        height: 3,
-        grid: [[false, false, true], [true, false, true], [false, true, true]]
-    }
-}
-
 definition = () ->
     this.use(Sammy.EJS);
     this.debug = true
@@ -79,10 +58,10 @@ definition = () ->
 
     this.get "#/game", () ->
         log("processing GET #/game")
-        this.render "board.ejs", { width: 100, height: 100, snippets: snippets }, (rendered) ->
+        this.render "board.ejs", { width: 100, height: 100, patterns: patterns }, (rendered) ->
             log("board rendered")
             this.event_context.swap(rendered)
-            $(".snippet").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
+            $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
                     id = ui.draggable[0].id
@@ -90,7 +69,7 @@ definition = () ->
                     dropPos = ui.offset
                     x = Math.round((dropPos.left - boardPos.left) / 5.0)
                     y = Math.round((dropPos.top - boardPos.top) / 5.0)
-                    s = snippets[id]
+                    s = pattern_map[id]
                     log("dropped", id, x, y, s)
                     cells = []
                     for dy in [0...s.height]

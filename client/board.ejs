@@ -3,25 +3,30 @@
   <input type="text" id="colour" value="#FF0000" />
 </div>
 
-<div id="snippets">
-  <% $.each(snippets, function(id, s) { %>
-    <div class="snippet-container">
-      <h5><%= s.name %></h5>
-      <div id="<%= id %>" class="snippet" style="width:<%= s.width * 5 %>">
-        <table class="board">
-          <% for (var y=0; y < s.height; y++) { %>
-            <tr>
-              <% for (var x=0; x < s.width; x++) { %>
-                <% if (s.grid[y][x]) { %>
-                  <td><div class="cell cell-on" style="background-color:red"></div></td>
-                <% } else { %>
-                  <td><div class="cell cell-off" style="background-color:white"></div></td>
-                <% } %>
+<div id="patterns">
+  <% $.each(patterns,function(name, list) { %>
+    <div class="pattern-section">
+      <h5><%= name %></h5>
+      <% $.each(list, function(i, s) { %>
+        <div class="pattern-container">
+          <h6><%= s.name %></h6>
+          <div id="<%= s.id %>" class="pattern" style="width:<%= s.width * 5 %>">
+            <table class="board">
+              <% for (var y=0; y < s.height; y++) { %>
+                <tr>
+                  <% for (var x=0; x < s.width; x++) { %>
+                    <% if (s.grid[y][x]) { %>
+                      <td><div class="cell cell-on" style="background-color:red"></div></td>
+                    <% } else { %>
+                      <td><div class="cell cell-off" style="background-color:white"></div></td>
+                    <% } %>
+                  <% } %>
+                </tr>
               <% } %>
-            </tr>
-          <% } %>
-        </table>
-      </div>
+            </table>
+          </div>
+        </div>
+      <% }) %>
     </div>
   <% }) %>
 </div>
