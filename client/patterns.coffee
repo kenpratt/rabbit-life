@@ -80,6 +80,17 @@ raw_patterns = {
                    XX_XX
                    _XX__"
         }
+    ],
+    "Oddballs": [
+        {
+            id: "pattern-rabbit",
+            name: "Rabbit",
+            grid: "X_X___
+                   X_X___
+                   XXXXXX
+                   XXXX_X
+                   XXXXXX"
+        }
     ]
 }
 
