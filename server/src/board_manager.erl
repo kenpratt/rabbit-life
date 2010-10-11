@@ -89,7 +89,7 @@ handle_raw_amqp_message(Message, State) ->
 
 handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
     Cells = proplists:get_value(cells, Props),
-    ?log_info("New cells: ~p", [Cells]),
+    ?log_info("New cells: ~128p", [Cells]),
     Board2 = board:set_cells(Cells, Board),
     State2 = State#state{board = Board2},
     broadcast_updated_board(State2),

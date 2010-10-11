@@ -24,7 +24,12 @@ get(Pos, #grid{data = Data} = Grid) ->
     end.
 
 set(Pos, Value, #grid{data = Data} = Grid) ->
-    Grid#grid{data = array:set(index_of(Pos, Grid), Value, Data)}.
+    case in_bounds(Pos, Grid) of
+        true ->
+            Grid#grid{data = array:set(index_of(Pos, Grid), Value, Data)};
+        false ->
+            Grid
+    end.
 
 active_cells(#grid{data = Data} = Grid) ->
     [{cell, index_to_position(I, Grid), Value} || {I, Value} <- array:sparse_to_orddict(Data)].
