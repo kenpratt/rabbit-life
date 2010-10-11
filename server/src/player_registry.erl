@@ -45,7 +45,7 @@ cull(Registry) ->
     dict:filter(fun(_Uuid, Player) -> is_alive(Player, Now) end, Registry).
 
 to_proplist(Registry) ->
-    [{players, [player_to_proplist(P) || {_Uuid,P} <- dict:to_list(Registry)]}].
+    [{players, [player_to_proplist(P) || P <- players(Registry)]}].
 
 %%%===================================================================
 %%% Internal functions
@@ -54,6 +54,10 @@ to_proplist(Registry) ->
 is_alive(#player{last_active = Time}, Now) ->
     DiffInMillis = timer:now_diff(Now, Time) / 1000,
     DiffInMillis < ?TIME_UNTIL_CULL.
+
+players(Registry) ->
+    lists:sort(fun(#player{nick = N1}, #player{nick = N2}) -> N1 =< N2 end,
+               [P || {_Uuid,P} <- dict:to_list(Registry)]).
 
 player_to_proplist(#player{uuid = Uuid, nick = Nick, colour = Colour}) ->
     [{uuid, Uuid}, {nick, Nick}, {colour, Colour}].
