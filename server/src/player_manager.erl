@@ -33,8 +33,8 @@ init([]) ->
     %% set up RabbitMQ (operations are idempotent)
     rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
     rabbit_client:create_queue(<<"player_manager">>, Channel),
-    rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, <<"life.register">>, Channel),
-    rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, <<"life.colour_change">>, Channel),
+    [rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, Topic, Channel)
+     || Topic <- [<<"life.client.register">>, <<"life.client.heartbeat">>, <<"life.client.colour_change">>]],
 
     %% deliver new AMQP messages to our Erlang inbox
     rabbit_client:subscribe_to_queue(<<"player_manager">>, Channel),
@@ -52,6 +52,7 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(cull, #state{players = Players} = State) ->
+    ?log_debug("Cull", []),
     case player_registry:cull(Players) of
         Players ->
             %% no change
@@ -92,7 +93,7 @@ handle_raw_amqp_message(Message, State) ->
     ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
-handle_message(<<"life.register">>, Props, #state{players = Players} = State) ->
+handle_message(<<"life.client.register">>, Props, #state{players = Players} = State) ->
     Uuid = proplists:get_value(uuid, Props),
     Nick = proplists:get_value(nick, Props),
     Colour = proplists:get_value(colour, Props),
@@ -103,7 +104,12 @@ handle_message(<<"life.register">>, Props, #state{players = Players} = State) ->
     broadcast_updated_players(State2),
     {noreply, State2};
 
-handle_message(<<"life.colour_change">>, Props, #state{players = Players} = State) ->
+handle_message(<<"life.client.heartbeat">>, Props, #state{players = Players} = State) ->
+    Uuid = proplists:get_value(uuid, Props),
+    Players2 = player_registry:heartbeat(Uuid, Players),
+    {noreply, State#state{players = Players2}};
+
+handle_message(<<"life.client.colour_change">>, Props, #state{players = Players} = State) ->
     Uuid = proplists:get_value(uuid, Props),
     Colour = proplists:get_value(colour, Props),
     ?log_info("Changing colour to ~s (~s)", [Colour, Uuid]),

@@ -88,7 +88,7 @@ definition = () ->
         status("Reticulating splines...")
         state.nick = this.params.nick
         state.colour = this.params.colour
-        MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.register")
+        MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.client.register")
 
     this.get "#/game", () ->
         log("GET #/game")
@@ -100,7 +100,7 @@ definition = () ->
                 c = $(this).val()
                 $(".cell-on").css("background-color", c)
                 state.colour = c
-                MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.colour_change"))
+                MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.client.colour_change"))
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone", cursor: "move" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
@@ -151,6 +151,7 @@ definition = () ->
         log("direct-message", e, m)
         if m.data.registered is true
             state.registered = true
+            setTimeout(root.heartbeat, 1000)
             this.redirect("#/game")
         else
             log("Error: don't know how to handle message", m)
@@ -190,6 +191,10 @@ status = (message) ->
 showErrorOverlay = (message) ->
     $("#error-overlay .message").html(message)
     $("#error-overlay").show()
+
+root.heartbeat = () ->
+    MQ.exchange("life").publish({ uuid: state.uuid }, "life.client.heartbeat")
+    setTimeout(root.heartbeat, 1000)
 
 app = $.sammy("#root", definition)
 
