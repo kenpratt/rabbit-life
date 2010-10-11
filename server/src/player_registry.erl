@@ -12,7 +12,7 @@
 
 -record(player, {uuid, nick, colour, last_active}).
 
--define(TIME_UNTIL_CULL, 5000).
+-define(TIME_UNTIL_CULL, 8000).
 
 %%%===================================================================
 %%% API

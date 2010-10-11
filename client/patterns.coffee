@@ -54,6 +54,15 @@ raw_patterns = {
                    __XX"
         }
         {
+            id: "pattern-tumbler"
+            name: "Tumbler"
+            grid: "_X_____X_
+                   X_X___X_X
+                   X__X_X__X
+                   __X___X__
+                   __XX_XX__"
+        }
+        {
             id: "pattern-pulsar"
             name: "Pulsar"
             grid: "__XXX___XXX__
@@ -69,6 +78,24 @@ raw_patterns = {
                    X____X_X____X
                    _____________
                    __XXX___XXX__"
+        }
+        {
+            id: "pattern-clock"
+            name: "Clock"
+            grid: "__X_
+                   X_X_
+                   _X_X
+                   _X__"
+        }
+        {
+            id: "pattern-mold"
+            name: "Mold"
+            grid: "___XX_
+                   __X__
+                   X__X_X
+                   ____X_
+                   X_XX__
+                   _X____"
         }
     ]
     "Spaceships": [
@@ -116,6 +143,22 @@ raw_patterns = {
                    XX_XX
                    _XX__"
         }
+        {
+            id: "pattern-nw-goose"
+            name: "Canada goose (NW)"
+            grid: "XXX__________
+                   X_________XX_
+                   _X______XXX_X
+                   ___XX__XX____
+                   ____X________
+                   ________X____
+                   ____XX___X___
+                   ___X_X_XX____
+                   ___X_X__X_XX_
+                   __X____XX____
+                   __XX_________
+                   __XX_________"
+        }
     ]
     "Guns": [
         {
@@ -141,6 +184,23 @@ raw_patterns = {
                    XXXXXX
                    XXXX_X
                    XXXXXX"
+        }
+        {
+            id: "pattern-butterfly"
+            name: "Butterfly"
+            grid: "X___
+                   XX__
+                   X_X_
+                   _XXX"
+        }
+        {
+            id: "pattern-exploder"
+            name: "Exploder"
+            grid: "X_X_X
+                   X___X
+                   X___X
+                   X___X
+                   X_X_X"
         }
         {
             id: "pattern-r-pentomino"

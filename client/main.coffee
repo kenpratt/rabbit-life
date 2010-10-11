@@ -11,7 +11,7 @@ init = () ->
 
 state = {
     uuid: null
-    nick: "Anonymouse"
+    nick: "anon"
     colour: "#e06d0f"
     connected: false
     registered: false
