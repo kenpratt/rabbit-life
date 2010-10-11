@@ -5,6 +5,7 @@
              life_sup,
              board_manager,
              board,
+             grid,
              player_manager,
              player_registry,
              rabbit_client,

@@ -2,8 +2,6 @@
 
 %% API
 -export([new/0,
-         get_cell/3,
-         set_cell/4,
          set_cells/2,
          tick/1,
          to_proplist/1]).
@@ -13,65 +11,54 @@
 -define(WIDTH, 200).
 -define(HEIGHT, 200).
 
--define(MAX_X, ?WIDTH - 1).
--define(MAX_Y, ?HEIGHT - 1).
-
 %%%===================================================================
 %%% API
 %%%===================================================================
 
 new() ->
-    lists:foldl(fun(Y, A) ->
-                        array:set(Y, array:new(?WIDTH), A)
-                end, array:new(?HEIGHT), lists:seq(0,?MAX_Y)).
-
-get_cell(X, Y, Board) ->
-    case in_board(X, Y) of
-        true ->
-            Row = array:get(Y, Board),
-            array:get(X, Row);
-        false ->
-            undefined
-    end.
-
-set_cell(X, Y, Colour, Board) ->
-    Row = array:get(Y, Board),
-    Row2 = array:set(X, Colour, Row),
-    array:set(Y, Row2, Board).
+    grid:new(?WIDTH, ?HEIGHT).
 
 set_cells([], Board) ->
     Board;
 set_cells([Cell|Rest], Board) ->
-    set_cells(Rest, set_cell(proplists:get_value(x, Cell), proplists:get_value(y, Cell), proplists:get_value(c, Cell), Board)).
+    X = proplists:get_value(x, Cell),
+    Y = proplists:get_value(y, Cell),
+    Colour = proplists:get_value(c, Cell),
+    set_cells(Rest, grid:set({X, Y}, Colour, Board)).
 
 tick(Board) ->
-    tick_cell(0, 0, Board, Board).
+    Positions = positions_to_check(Board),
+    do_tick(Positions, Board, new()).
 
 to_proplist(Board) ->
-    Cells = lists:append([[[{x,X},{y,Y},{c,C}] || {X, C} <- array:sparse_to_orddict(Row)] || {Y, Row} <- array:sparse_to_orddict(Board)]),
-    [{board, [{cells, Cells}]}].
+    [{board, [{cells, [[{x, X}, {y, Y}, {c, Colour}] || {cell, {X, Y}, Colour} <- grid:active_cells(Board)]}]}].
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
 
-in_board(X, Y) ->
-    X >= 0 andalso X =< ?MAX_X andalso Y >= 0 andalso Y =< ?MAX_Y.
+%% check each active cell and all of its neighbours
+positions_to_check(Board) ->
+    Set = lists:foldl(fun({cell,Pos,_}, Set) -> sets:union(Set, sets:from_list([Pos|neighbour_positions(Pos)])) end, sets:new(), grid:active_cells(Board)),
+    sets:to_list(Set).
 
-tick_cell(0, ?HEIGHT, _OldBoard, NewBoard) ->
+neighbour_positions({X, Y}) ->
+    [{X-1,Y-1}, {X,Y-1}, {X+1,Y-1}, {X-1,Y}, {X+1,Y}, {X-1,Y+1}, {X,Y+1}, {X+1,Y+1}].
+
+do_tick([], _, NewBoard) ->
     NewBoard;
-tick_cell(?WIDTH, Y, OldBoard, NewBoard) ->
-    tick_cell(0, Y+1, OldBoard, NewBoard);
-tick_cell(X, Y, OldBoard, NewBoard) ->
-    Neighbours = live_neighbours(X, Y, OldBoard),
-    Cell = get_cell(X, Y, OldBoard),
-    Cell2 = next_state(Cell, Neighbours),
-    NewBoard2 = set_cell(X, Y, Cell2, NewBoard),
-    tick_cell(X+1, Y, OldBoard, NewBoard2).
+do_tick([Pos|Rest], OldBoard, NewBoard) ->
+    Cell = grid:get(Pos, OldBoard),
+    Neighbours = live_neighbours(Pos, OldBoard),
+    case next_state(Cell, Neighbours) of
+        undefined ->
+            do_tick(Rest, OldBoard, NewBoard);
+        Value ->
+            do_tick(Rest, OldBoard, grid:set(Pos, Value, NewBoard))
+    end.
 
-live_neighbours(X, Y, Board) ->
-    Positions = [{X-1,Y-1}, {X,Y-1}, {X+1,Y-1}, {X-1,Y}, {X+1,Y}, {X-1,Y+1}, {X,Y+1}, {X+1,Y+1}],
-    Neighbours = [get_cell(NX, NY, Board) || {NX, NY} <- Positions],
+live_neighbours(Pos, Board) ->
+    Neighbours = [grid:get(N, Board) || N <- neighbour_positions(Pos)],
     lists:filter(fun(E) -> E =/= undefined end, Neighbours).
 
 next_state(undefined, Neighbours) ->
