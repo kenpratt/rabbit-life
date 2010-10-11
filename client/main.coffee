@@ -108,7 +108,7 @@ definition = () ->
                     boardPos = $(this).offset()
                     dropPos = ui.offset
                     x = Math.round((dropPos.left - boardPos.left) / 5.0)
-                    y = Math.round((dropPos.top - boardPos.top) / 5.0)
+                    y = Math.round((dropPos.top - boardPos.top) / 5.0) - 2
                     s = pattern_map[id]
                     log("dropped", id, x, y, s)
                     cells = []
