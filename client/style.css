@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0.5em;
-    border-top: 5px solid #f50;
+    border-top: 5px solid #e06d0f;
     color: #333;
     font-family: "Helvetica Neue", "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
 }
@@ -12,7 +12,7 @@ h1,h2,h3,h4,h5,h6 {
     padding: 0;
 }
 h1,h2,h3 {
-    color: #f50;
+    color: #e06d0f;
     letter-spacing: -1px;
 }
 h1 {

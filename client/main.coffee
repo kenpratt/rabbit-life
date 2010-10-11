@@ -12,7 +12,7 @@ init = () ->
 state = {
     uuid: null
     nick: "Anonymouse"
-    colour: "#FF5500"
+    colour: "#e06d0f"
     connected: false
     registered: false
     dirty_cells: []
