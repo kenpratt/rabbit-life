@@ -59,7 +59,7 @@ h5 {
 .board tr td {
     padding: 0;
 }
-.cell {
+.cell, .board tr td div {
     background: #fff;
     width: 4px;
     height: 4px;
