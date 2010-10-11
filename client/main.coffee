@@ -80,6 +80,7 @@ definition = () ->
         log("GET #/connect")
         this.render "register.ejs", { nick: state.nick, colour: state.colour }, (rendered) ->
             this.event_context.swap(rendered)
+            $('#colour').mColorPicker()
 
     this.post "#/register", () ->
         log("POST #/register", this.params)
@@ -93,6 +94,10 @@ definition = () ->
         this.render "game.ejs", { width: 200, height: 200, patterns: patterns, nick: state.nick, colour: state.colour }, (rendered) ->
             log("game rendered")
             this.event_context.swap(rendered)
+            $('#colour').mColorPicker()
+            $('#colour').bind('colorpicked', () ->
+                c = $(this).val()
+                $(".cell-on").css("background-color", c))
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
@@ -109,9 +114,6 @@ definition = () ->
                             cells.push({x: x + dx, y: y + dy, c: $("#colour").attr("value")})
                     MQ.exchange("life").publish({ cells: cells }, "life.board.add")
             })
-            $("#colour").change(() ->
-                c = $("#colour").attr("value")
-                $(".cell-on").css("background-color", c))
 
     this.bind "update-board", (e, m) ->
         log("update-board", e, m)

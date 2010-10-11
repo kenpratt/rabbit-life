@@ -17,7 +17,7 @@ h1,h2,h3 {
 h1 {
     padding-left: 40px;
     line-height: 1em;
-    background: url('rabbit.png') no-repeat left center;
+    background: url('images/rabbit.png') no-repeat left center;
  }
 h4 {
     padding: 0.2em 0.5em;
@@ -58,6 +58,16 @@ h5 {
 
 #colour-picker {
     margin: 0 0 1em 0;
+}
+#colour {
+    width: 60px;
+    height: 15px;
+}
+#icp_colour {
+    border: 1px solid #ddd !important;
+}
+#mColorPicker {
+    margin-top: 6px;
 }
 
 .pattern-section {
