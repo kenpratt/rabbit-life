@@ -11,7 +11,7 @@
 -include("logging.hrl").
 
 -define(SERVER, ?MODULE).
--define(CULL_INTERVAL, 5000). % in milliseconds
+-define(CULL_INTERVAL, 2000). % in milliseconds
 
 -record(state, {players, cull_timer, connection, channel}).
 
@@ -52,8 +52,6 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(cull, #state{players = Players} = State) ->
-    ?log_info("Cull", []),
-    broadcast_updated_players(State), %% TODO remove (just in for testing)
     case player_registry:cull(Players) of
         Players ->
             %% no change
