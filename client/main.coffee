@@ -53,7 +53,7 @@ definition = () ->
         status("Connecting...")
         context = this
         MQ.configure {
-            logger: console,
+            # logger: console, # verbose AMQP logging
             host: "0.0.0.0",
             port: 5777
         }
@@ -119,11 +119,6 @@ definition = () ->
             })
 
     this.bind "update-board", (e, m) ->
-        log("update-board", e, m)
-        start = (new Date()).getTime()
-
-        # TODO optimize update by only modifying the cells that changed colour?
-
         # clear board
         for c in state.dirty_cells
             $("#cell_" + c.x + "_" + c.y).css("background", "#ffffff")
@@ -134,18 +129,9 @@ definition = () ->
             $("#cell_" + c.x + "_" + c.y).css("background", c.c)
         state.dirty_cells = cells
 
-        diff = (new Date()).getTime() - start
-        log("update took: ", diff)
-
     this.bind "update-players", (e, m) ->
-        log("update-players", e, m)
-        start = (new Date()).getTime()
-
         this.render "players.ejs", { players: m.data.players }, (rendered) ->
             $("#players").html(rendered)
-
-        diff = (new Date()).getTime() - start
-        log("update took: ", diff)
 
     this.bind "direct-message", (e, m) ->
         log("direct-message", e, m)

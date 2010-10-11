@@ -90,7 +90,7 @@ handle_raw_amqp_message(Message, State) ->
     Topic = rabbit_client:get_topic(Message),
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
-    ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
+    ?log_debug("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
 handle_message(<<"life.client.register">>, Props, #state{players = Players} = State) ->

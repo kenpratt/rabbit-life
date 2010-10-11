@@ -1,7 +1,8 @@
 -define(log(Level, Pid, Module, Line, Fmt, Args),
         io:format("[~s] [~p] ~s:~p " ++ Fmt ++ "~n", [Level, Pid, Module, Line|Args])).
 -define(log_debug(Fmt, Args),
-        ?log(debug, self(), ?MODULE, ?LINE, Fmt, Args)).
+        noop).
+%        ?log(debug, self(), ?MODULE, ?LINE, Fmt, Args)).
 -define(log_info(Fmt, Args),
         ?log(info, self(), ?MODULE, ?LINE, Fmt, Args)).
 -define(log_warn(Fmt, Args),

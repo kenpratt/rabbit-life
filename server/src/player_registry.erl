@@ -53,7 +53,6 @@ to_proplist(Registry) ->
 
 is_alive(#player{last_active = Time}, Now) ->
     DiffInMillis = timer:now_diff(Now, Time) / 1000,
-    io:format("~p~n", [DiffInMillis]),
     DiffInMillis < ?TIME_UNTIL_CULL.
 
 player_to_proplist(#player{uuid = Uuid, nick = Nick, colour = Colour}) ->

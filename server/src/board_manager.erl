@@ -51,6 +51,7 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(tick, #state{board = Board} = State) ->
+    ?log_debug("Tick", []),
     Board2 = board:tick(Board),
     State2 = State#state{board = Board2},
     broadcast_updated_board(State2),
@@ -83,7 +84,7 @@ handle_raw_amqp_message(Message, State) ->
     Topic = rabbit_client:get_topic(Message),
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
-    ?log_info("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
+    ?log_debug("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
 handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
