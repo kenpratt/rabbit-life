@@ -33,7 +33,7 @@ init([]) ->
     %% set up RabbitMQ (operations are idempotent)
     rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
     rabbit_client:create_queue(<<"board_changes">>, Channel),
-    rabbit_client:bind_queue(<<"life">>, <<"board_changes">>, <<"life.board.add">>, Channel),
+    rabbit_client:bind_queue(<<"life">>, <<"board_changes">>, <<"life.board.add_cells">>, Channel),
 
     %% deliver new AMQP messages to our Erlang inbox
     rabbit_client:subscribe_to_queue(<<"board_changes">>, Channel),
@@ -87,7 +87,7 @@ handle_raw_amqp_message(Message, State) ->
     ?log_debug("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
     handle_message(Topic, DecodedContent, State).
 
-handle_message(<<"life.board.add">>, Props, #state{board = Board} = State) ->
+handle_message(<<"life.board.add_cells">>, Props, #state{board = Board} = State) ->
     Cells = proplists:get_value(cells, Props),
     ?log_info("New cells: ~128p", [Cells]),
     Board2 = board:set_cells(Cells, Board),

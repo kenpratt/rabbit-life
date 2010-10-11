@@ -34,7 +34,7 @@ init([]) ->
     rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
     rabbit_client:create_queue(<<"player_manager">>, Channel),
     [rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, Topic, Channel)
-     || Topic <- [<<"life.client.register">>, <<"life.client.heartbeat">>, <<"life.client.colour_change">>]],
+     || Topic <- [<<"life.player.*.register">>, <<"life.player.*.heartbeat">>, <<"life.player.*.colour_change">>]],
 
     %% deliver new AMQP messages to our Erlang inbox
     rabbit_client:subscribe_to_queue(<<"player_manager">>, Channel),
@@ -91,25 +91,25 @@ handle_raw_amqp_message(Message, State) ->
     RawContent = rabbit_client:get_content(Message),
     DecodedContent = json:decode(RawContent),
     ?log_debug("Incoming message: ~p, ~128p", [Topic, DecodedContent]),
-    handle_message(Topic, DecodedContent, State).
+    handle_message(re:split(Topic, "\\."), DecodedContent, State).
 
-handle_message(<<"life.client.register">>, Props, #state{players = Players} = State) ->
+handle_message([<<"life">>, <<"player">>, Uuid, <<"register">>], Props, #state{players = Players} = State) ->
     Uuid = proplists:get_value(uuid, Props),
     Nick = proplists:get_value(nick, Props),
     Colour = proplists:get_value(colour, Props),
     ?log_info("New player: ~s, ~s (~s)", [Nick, Colour, Uuid]),
     Players2 = player_registry:add_player(Uuid, Nick, Colour, Players),
     State2 = State#state{players = Players2},
-    send_to_player(Uuid, [{registered, true}], State),
+    publish(list_to_binary([<<"life.player.">>, Uuid, <<".registered">>]), [{registered, true}], State),
     broadcast_updated_players(State2),
     {noreply, State2};
 
-handle_message(<<"life.client.heartbeat">>, Props, #state{players = Players} = State) ->
+handle_message([<<"life">>, <<"player">>, Uuid, <<"heartbeat">>], Props, #state{players = Players} = State) ->
     Uuid = proplists:get_value(uuid, Props),
     Players2 = player_registry:heartbeat(Uuid, Players),
     {noreply, State#state{players = Players2}};
 
-handle_message(<<"life.client.colour_change">>, Props, #state{players = Players} = State) ->
+handle_message([<<"life">>, <<"player">>, Uuid, <<"colour_change">>], Props, #state{players = Players} = State) ->
     Uuid = proplists:get_value(uuid, Props),
     Colour = proplists:get_value(colour, Props),
     ?log_info("Changing colour to ~s (~s)", [Colour, Uuid]),
@@ -118,11 +118,8 @@ handle_message(<<"life.client.colour_change">>, Props, #state{players = Players}
     broadcast_updated_players(State2),
     {noreply, State2}.
 
-send_to_player(Uuid, Message, State) ->
-    publish(list_to_binary([<<"life.player.">>, Uuid]), Message, State).
-
 broadcast_updated_players(#state{players = Players} = State) ->
-    publish(<<"life.players.update">>, player_registry:to_proplist(Players), State).
+    publish(<<"life.player_list.update">>, player_registry:to_proplist(Players), State).
 
 publish(Topic, Message, #state{channel = Channel}) ->
     rabbit_client:publish(<<"life">>, Topic, json:encode(Message), Channel).

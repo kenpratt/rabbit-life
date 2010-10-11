@@ -72,10 +72,10 @@ definition = () ->
             log("Error: no binding matches", m)
         MQ.queue("auto").bind("life", "life.board.update").callback (m) ->
             context.trigger("update-board", m)
-        MQ.queue("auto").bind("life", "life.players.update").callback (m) ->
-            context.trigger("update-players", m)
-        MQ.queue("auto").bind("life", "life.player." + state.uuid).callback (m) ->
-            context.trigger("direct-message", m)
+        MQ.queue("auto").bind("life", "life.player_list.update").callback (m) ->
+            context.trigger("update-player-list", m)
+        MQ.queue("auto").bind("life", "life.player." + state.uuid + ".registered").callback (m) ->
+            context.trigger("registered", m)
 
     this.get "#/register", () ->
         log("GET #/connect")
@@ -88,7 +88,7 @@ definition = () ->
         status("Reticulating splines...")
         state.nick = this.params.nick
         state.colour = this.params.colour
-        MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.client.register")
+        MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.player." + state.uuid + ".register")
 
     this.get "#/game", () ->
         log("GET #/game")
@@ -100,7 +100,7 @@ definition = () ->
                 c = $(this).val()
                 $(".cell-on").css("background-color", c)
                 state.colour = c
-                MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.client.colour_change"))
+                MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.player." + state.uuid + ".colour_change"))
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, helper: "clone", cursor: "move" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
@@ -115,7 +115,7 @@ definition = () ->
                     for dy in [0...s.height]
                         for dx in [0...s.width] when s.grid[dy][dx]
                             cells.push({x: x + dx, y: y + dy, c: $("#colour").attr("value")})
-                    MQ.exchange("life").publish({ cells: cells }, "life.board.add")
+                    MQ.exchange("life").publish({ cells: cells }, "life.board.add_cells")
             })
 
     this.bind "update-board", (e, m) ->
@@ -129,18 +129,18 @@ definition = () ->
             $("#cell_" + c.x + "_" + c.y).css("background", c.c)
         state.dirty_cells = cells
 
-    this.bind "update-players", (e, m) ->
+    this.bind "update-player-list", (e, m) ->
         this.render "players.ejs", { players: m.data.players }, (rendered) ->
             $("#players").html(rendered)
 
-    this.bind "direct-message", (e, m) ->
-        log("direct-message", e, m)
+    this.bind "registered", (e, m) ->
+        log("registered", e, m)
         if m.data.registered is true
             state.registered = true
             setTimeout(root.heartbeat, 1000)
             this.redirect("#/game")
         else
-            log("Error: don't know how to handle message", m)
+            log("Error: registration failed", m)
 
 uuid = () ->
     # http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
@@ -179,7 +179,7 @@ showErrorOverlay = (message) ->
     $("#error-overlay").show()
 
 root.heartbeat = () ->
-    MQ.exchange("life").publish({ uuid: state.uuid }, "life.client.heartbeat")
+    MQ.exchange("life").publish({ uuid: state.uuid }, "life.player." + state.uuid + ".heartbeat")
     setTimeout(root.heartbeat, 1000)
 
 app = $.sammy("#root", definition)
