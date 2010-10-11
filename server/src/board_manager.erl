@@ -1,4 +1,4 @@
--module(life_server).
+-module(board_manager).
 
 -behaviour(gen_server).
 
