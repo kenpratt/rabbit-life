@@ -51,10 +51,11 @@ definition = () ->
     this.get "#/connect", () ->
         log("GET #/connect")
         status("Connecting...")
+        log("Connecting to AMQP server at", serverIp(), 5777)
         context = this
         MQ.configure {
             # logger: console, # verbose AMQP logging
-            host: window.location.hostname,
+            host: serverIp(),
             port: 5777
         }
         MQ.on "load", () ->
@@ -177,6 +178,13 @@ status = (message) ->
 showErrorOverlay = (message) ->
     $("#error-overlay .message").html(message)
     $("#error-overlay").show()
+
+serverIp = () ->
+    hostname = window.location.hostname
+    if hostname is "localhost"
+        "127.0.0.1"
+    else
+        hostname
 
 root.heartbeat = () ->
     MQ.exchange("life").publish({ uuid: state.uuid }, "life.player." + state.uuid + ".heartbeat")
