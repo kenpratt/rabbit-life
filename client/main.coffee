@@ -54,7 +54,7 @@ definition = () ->
         context = this
         MQ.configure {
             # logger: console, # verbose AMQP logging
-            host: "0.0.0.0",
+            host: window.location.hostname,
             port: 5777
         }
         MQ.on "load", () ->
