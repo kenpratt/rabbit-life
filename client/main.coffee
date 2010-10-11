@@ -27,6 +27,7 @@ definition = () ->
         log("init")
         state.uuid = uuid()
         embedSwf()
+        document.onselectstart = () -> return false # chrome move cursor hack
 
     # ensure connected & registered, no matter what page is requested
     this.before () ->
@@ -100,7 +101,7 @@ definition = () ->
                 $(".cell-on").css("background-color", c)
                 state.colour = c
                 MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.colour_change"))
-            $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
+            $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone", cursor: "move" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
                     id = ui.draggable[0].id

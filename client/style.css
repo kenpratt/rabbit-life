@@ -48,6 +48,12 @@ h5 {
     background: #ddd;
     border-spacing: 1px;
 }
+.ui-draggable-dragging .board {
+    background: none;
+}
+.ui-draggable {
+    cursor: move;
+}
 .board tr {
 }
 .board tr td {
