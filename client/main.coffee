@@ -65,7 +65,7 @@ definition = () ->
         MQ.on "disconnect", () ->
             log("Disconnected")
             state.connected = false
-            # TODO show grey overlay on screen asking player to reload the game
+            showErrorOverlay("Disconnected from the server. Please refresh the page to try again.")
         MQ.topic("life")
         MQ.queue("auto").callback (m) ->
             log("Error: no binding matches", m)
@@ -178,6 +178,10 @@ embedSwf = () ->
         () ->
             log("Swfobject loaded")
         )
+
+showErrorOverlay = (message) ->
+    $("#error-overlay .message").html(message)
+    $("#error-overlay").show()
 
 app = $.sammy("#root", definition)
 
