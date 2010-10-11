@@ -97,7 +97,9 @@ definition = () ->
             $('#colour').mColorPicker()
             $('#colour').bind('colorpicked', () ->
                 c = $(this).val()
-                $(".cell-on").css("background-color", c))
+                $(".cell-on").css("background-color", c)
+                state.colour = c
+                MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.colour_change"))
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, snap: ".cell", helper: "clone" })
             $("#board-container").droppable({
                 drop: (e, ui) ->

@@ -34,6 +34,7 @@ init([]) ->
     rabbit_client:create_exchange(<<"life">>, <<"topic">>, Channel),
     rabbit_client:create_queue(<<"player_manager">>, Channel),
     rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, <<"life.register">>, Channel),
+    rabbit_client:bind_queue(<<"life">>, <<"player_manager">>, <<"life.colour_change">>, Channel),
 
     %% deliver new AMQP messages to our Erlang inbox
     rabbit_client:subscribe_to_queue(<<"player_manager">>, Channel),
@@ -101,6 +102,15 @@ handle_message(<<"life.register">>, Props, #state{players = Players} = State) ->
     Players2 = player_registry:add_player(Uuid, Nick, Colour, Players),
     State2 = State#state{players = Players2},
     send_to_player(Uuid, [{registered, true}], State),
+    broadcast_updated_players(State2),
+    {noreply, State2};
+
+handle_message(<<"life.colour_change">>, Props, #state{players = Players} = State) ->
+    Uuid = proplists:get_value(uuid, Props),
+    Colour = proplists:get_value(colour, Props),
+    ?log_info("Changing colour to ~s (~s)", [Colour, Uuid]),
+    Players2 = player_registry:change_colour(Uuid, Colour, Players),
+    State2 = State#state{players = Players2},
     broadcast_updated_players(State2),
     {noreply, State2}.
 
