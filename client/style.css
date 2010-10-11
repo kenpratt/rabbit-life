@@ -3,6 +3,7 @@ body {
     padding: 0.5em;
     border-top: 5px solid #f50;
     color: #333;
+    font-family: "Helvetica Neue", "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -36,6 +37,11 @@ h5 {
 }
 #content {
    margin-left: 205px;
+}
+
+.status {
+    font-size: 90%;
+    font-style: italic;
 }
 
 .board {
@@ -89,7 +95,7 @@ h5 {
 }
 
 #launch {
-    padding: 1em;
+    padding: 0.5em;
 }
 #launch label {
     display: block;

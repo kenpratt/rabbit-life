@@ -49,7 +49,7 @@ definition = () ->
 
     this.get "#/connect", () ->
         log("GET #/connect")
-        this.swap("Connecting...")
+        status("Connecting...")
         context = this
         MQ.configure {
             logger: console,
@@ -84,7 +84,7 @@ definition = () ->
 
     this.post "#/register", () ->
         log("POST #/register", this.params)
-        this.swap("Reticulating splines...")
+        status("Reticulating splines...")
         state.nick = this.params.nick
         state.colour = this.params.colour
         MQ.exchange("life").publish({ uuid: state.uuid, nick: state.nick, colour: state.colour }, "life.register")
@@ -182,6 +182,9 @@ embedSwf = () ->
         () ->
             log("Swfobject loaded")
         )
+
+status = (message) ->
+    $("#root").html('<div class="status">' + message + '</div>')
 
 showErrorOverlay = (message) ->
     $("#error-overlay .message").html(message)
