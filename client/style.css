@@ -46,6 +46,7 @@ h5 {
 
 .board {
     position: relative;
+    background: url("images/board_bg.png");
 }
 .ui-draggable-dragging .board {
     background: none;

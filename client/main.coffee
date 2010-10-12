@@ -122,7 +122,7 @@ definition = () ->
 
         # set cells that came back from the server
         for c in m.data.board.cells
-            $("#board").append('<div class="cell" style="left:' + (c.x * 5) + 'px;top:' + (c.y * 5) + 'px;background-color:' + c.c + ';"></div>')
+            $("#board").append('<div class="cell" style="left:' + (c.x * 5 + 1) + 'px;top:' + (c.y * 5 + 1) + 'px;background-color:' + c.c + ';"></div>')
         diff = (new Date()).getTime() - start
         log("update took: ", diff)
 

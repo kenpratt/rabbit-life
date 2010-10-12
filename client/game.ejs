@@ -13,9 +13,9 @@
           <div class="pattern-container">
             <h6><%= s.name %></h6>
             <div id="<%= s.id %>" class="pattern" align="center">
-              <div class="board" style="width:<%= s.width * 5 %>px;height:<%= s.height * 5 %>px;">
+              <div class="board" style="width:<%= s.width * 5 + 1 %>px;height:<%= s.height * 5 + 1 %>px;">
                 <% $.each(s.cells, function(i, cell) { %>
-                  <div class="cell" style="left:<%= cell.x * 5 %>px;top:<%= cell.y * 5 %>px;background-color:<%= colour %>;"></div>
+                  <div class="cell" style="left:<%= cell.x * 5 + 1 %>px;top:<%= cell.y * 5 + 1 %>px;background-color:<%= colour %>;"></div>
                 <% }) %>
               </div>
             </div>
@@ -28,6 +28,6 @@
 
 <div id="content">
   <div id="board-container">
-    <div id="board" class="board" style="width:<%= width * 5 %>px;height:<%= height * 5 %>px;"></div>
+    <div id="board" class="board" style="width:<%= width * 5 + 1 %>px;height:<%= height * 5 + 1 %>px;"></div>
   </div>
 </div>
