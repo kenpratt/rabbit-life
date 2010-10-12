@@ -101,7 +101,7 @@ definition = () ->
                 $(".pattern .cell").css("background-color", c)
                 state.colour = c
                 MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.player." + state.uuid + ".colour_change"))
-            $(".pattern").draggable({ revert: "invalid", opacity: 0.5, helper: "clone", cursor: "move" })
+            $(".pattern").draggable({ revert: "invalid", opacity: 0.5, zIndex: 100, helper: "clone", cursor: "move" })
             $("#board-container").droppable({
                 drop: (e, ui) ->
                     id = ui.draggable[0].id
