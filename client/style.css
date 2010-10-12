@@ -56,7 +56,6 @@ h5 {
 }
 .cell {
     position: absolute;
-    background: green;
     width: 4px;
     height: 4px;
 }
