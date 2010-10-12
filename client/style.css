@@ -45,8 +45,7 @@ h5 {
 }
 
 .board {
-    background: #ddd;
-    border-spacing: 1px;
+    position: relative;
 }
 .ui-draggable-dragging .board {
     background: none;
@@ -54,18 +53,11 @@ h5 {
 .ui-draggable {
     cursor: move;
 }
-.board tr {
-}
-.board tr td {
-    padding: 0;
-}
-.cell, .board tr td div {
-    background: #fff;
+.cell {
+    position: absolute;
+    background: green;
     width: 4px;
     height: 4px;
-}
-.cell.on {
-    background: #333;
 }
 
 #colour-picker {

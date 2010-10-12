@@ -229,9 +229,10 @@ raw_patterns = {
 root.patterns = {}
 _.each(raw_patterns, (list, name) ->
     root.patterns[name] = _.map(list, (pattern) ->
-        # turn grids into nested boolean lists
+        # construct list of cells from grid
         lines = pattern.grid.split(/[\s\n]+/)
-        pattern.grid = _.map(lines, (line) -> _.map(line.split(""), (char) -> char == "X"))
+        pattern.cells = []
+        _.each(lines, (line, y) -> _.each(line.split(""), (char, x) -> pattern.cells.push({x: x, y: y}) if char is "X" ))
 
         # calculate width & height of the pattern
         pattern.width = lines[0].length

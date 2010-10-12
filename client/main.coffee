@@ -15,7 +15,6 @@ state = {
     colour: "#e06d0f"
     connected: false
     registered: false
-    dirty_cells: []
 }
 
 definition = () ->
@@ -99,7 +98,7 @@ definition = () ->
             $('#colour').mColorPicker()
             $('#colour').bind('colorpicked', () ->
                 c = $(this).val()
-                $(".cell-on").css("background-color", c)
+                $(".pattern .cell").css("background-color", c)
                 state.colour = c
                 MQ.exchange("life").publish({ uuid: state.uuid, colour: state.colour }, "life.player." + state.uuid + ".colour_change"))
             $(".pattern").draggable({ revert: "invalid", opacity: 0.5, helper: "clone", cursor: "move" })
@@ -112,23 +111,20 @@ definition = () ->
                     y = Math.round((dropPos.top - boardPos.top) / 5.0) - 2
                     s = pattern_map[id]
                     log("dropped", id, x, y, s)
-                    cells = []
-                    for dy in [0...s.height]
-                        for dx in [0...s.width] when s.grid[dy][dx]
-                            cells.push({x: x + dx, y: y + dy, c: $("#colour").attr("value")})
+                    cells = _.map(s.cells, (c) -> {x: x + c.x, y: y + c.y, c: state.colour})
                     MQ.exchange("life").publish({ cells: cells }, "life.board.add_cells")
             })
 
     this.bind "update-board", (e, m) ->
+        start = (new Date()).getTime()
         # clear board
-        for c in state.dirty_cells
-            $("#cell_" + c.x + "_" + c.y).css("background", "#ffffff")
+        $("#board").html("")
 
         # set cells that came back from the server
-        cells = m.data.board.cells
-        for c in cells
-            $("#cell_" + c.x + "_" + c.y).css("background", c.c)
-        state.dirty_cells = cells
+        for c in m.data.board.cells
+            $("#board").append('<div class="cell" style="left:' + (c.x * 5) + 'px;top:' + (c.y * 5) + 'px;background-color:' + c.c + ';"></div>')
+        diff = (new Date()).getTime() - start
+        log("update took: ", diff)
 
     this.bind "update-player-list", (e, m) ->
         this.render "players.ejs", { players: m.data.players }, (rendered) ->

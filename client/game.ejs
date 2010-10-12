@@ -1,49 +1,33 @@
 <div id="sidebar">
-<div id="colour-picker">
-  <h4>Your colour</h4>
-  <input id="colour" name="colour" type="color" value="<%= colour %>" data-text="hidden" data-hex="true" />
-</div>
+  <div id="colour-picker">
+    <h4>Your colour</h4>
+    <input id="colour" name="colour" type="color" value="<%= colour %>" data-text="hidden" data-hex="true" />
+  </div>
 
-<div id="patterns">
-  <h4>Patterns</h4>
-  <% $.each(patterns,function(name, list) { %>
-    <div class="pattern-section">
-      <h5><%= name %></h5>
-      <% $.each(list, function(i, s) { %>
-        <div class="pattern-container">
-          <h6><%= s.name %></h6>
-          <div id="<%= s.id %>" class="pattern" style="width:<%= s.width * 5 %>" align="center">
-            <table class="board">
-              <% for (var y=0; y < s.height; y++) { %>
-                <tr>
-                  <% for (var x=0; x < s.width; x++) { %>
-                    <% if (s.grid[y][x]) { %>
-                      <td><div class="cell cell-on" style="background-color:<%= colour %>"></div></td>
-                    <% } else { %>
-                      <td><div class="cell cell-off"></div></td>
-                    <% } %>
-                  <% } %>
-                </tr>
-              <% } %>
-            </table>
+  <div id="patterns">
+    <h4>Patterns</h4>
+    <% $.each(patterns,function(name, list) { %>
+      <div class="pattern-section">
+        <h5><%= name %></h5>
+        <% $.each(list, function(i, s) { %>
+          <div class="pattern-container">
+            <h6><%= s.name %></h6>
+            <div id="<%= s.id %>" class="pattern" align="center">
+              <div class="board" style="width:<%= s.width * 5 %>px;height:<%= s.height * 5 %>px;">
+                <% $.each(s.cells, function(i, cell) { %>
+                  <div class="cell" style="left:<%= cell.x * 5 %>px;top:<%= cell.y * 5 %>px;background-color:<%= colour %>;"></div>
+                <% }) %>
+              </div>
+            </div>
           </div>
-        </div>
-      <% }) %>
-    </div>
-  <% }) %>
-</div>
+        <% }) %>
+      </div>
+    <% }) %>
+  </div>
 </div>
 
 <div id="content">
-<div id="board-container">
-  <table id="board" class="board">
-    <% for (var y=0; y < height; y++) { %>
-      <tr>
-        <% for (var x=0; x < width; x++) { %>
-          <td><div id="cell_<%= x %>_<%= y %>"></div></td>
-        <% } %>
-      </tr>
-    <% } %>
-  </table>
-</div>
+  <div id="board-container">
+    <div id="board" class="board" style="width:<%= width * 5 %>px;height:<%= height * 5 %>px;"></div>
+  </div>
 </div>
