@@ -2,6 +2,8 @@
 
 A multiplayer version of [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life), built as a [RabbitMQ](http://www.rabbitmq.com/) demo for the [Vancouver Erlang Meetup](http://www.meetup.com/erlang-vancouver/).
 
+The slides from the talk covering an introduction to RabbitMQ as well as this demo are available at [http://www.slideshare.net/kenpratt/intro-to-rabbitmq](http://www.slideshare.net/kenpratt/intro-to-rabbitmq).
+
 ## Requirements
 
 * [Erlang](http://www.erlang.org/) (tested on R14B)
